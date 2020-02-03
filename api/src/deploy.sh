@@ -23,7 +23,7 @@ gcloud compute instances create "mvk-backend-api" \
     --image-project=debian-cloud \
     --machine-type=n1-standard-2 \
     --scopes userinfo-email,cloud-platform \
-    --metadata-from-file startup-script=startup-script.sh \
+    --metadata-from-file api/src/startup-script=startup-script.sh \
     --zone europe-north1-a \
     --tags http-server
 # [END getting_started_gce_create_instance]
