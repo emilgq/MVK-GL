@@ -23,7 +23,7 @@ gcloud compute instances create "mvk-backend-api" \
     --image-project=debian-cloud \
     --machine-type=n1-standard-2 \
     --scopes userinfo-email,cloud-platform \
-    --metadata-from-file startup-script=startup-script.sh \
+    --metadata-from-file startup-script=api/src/startup-script.sh \
     --zone europe-north1-a \
     --tags http-server
 # [END getting_started_gce_create_instance]
@@ -33,3 +33,6 @@ gcloud compute firewall-rules create default-allow-http-8080 \
     --source-ranges 0.0.0.0/0 \
     --target-tags http-server \
     --description "Allow port 8080 access to http-server"
+
+# Check status of deployment procedure
+gcloud compute instances get-serial-port-output mvk-backend-api --zone europe-north1-a
