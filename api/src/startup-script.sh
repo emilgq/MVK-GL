@@ -35,7 +35,7 @@ git clone https://github.com/emilgq/MVK-GL/ /opt/app
 # Python environment setup
 virtualenv -p python3 /opt/app/api/src/env
 source /opt/app/api/src/env/bin/activate
-/opt/app/gce/api/src/bin/pip install -r /opt/app/api/src/requirements.txt
+/opt/app/api/src/bin/pip install -r /opt/app/api/src/requirements.txt
 
 # Set ownership to newly created account
 chown -R pythonapp:pythonapp /opt/app
