@@ -6,7 +6,7 @@ import json
 
 # Stockholms kordinater på en höjd av 59 ger cloud coverage
 endpoint_url = "https://api.greenlytics.io/weather/v1/get_nwp"
-headers = {"Authorization": "1iqsmV9rE6UhCkyzosBpROkGVgv0BrQ87aCPqLtV4VrBPwf0HbSESt8twLuDj3lrKUmj9sSe"}
+headers = {"Authorization": ""}
 params = {
     'model': 'DWD_ICON-EU',
     'start_date': '2019-05-15 00',
