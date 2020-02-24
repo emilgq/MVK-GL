@@ -6,8 +6,7 @@ CREATE TABLE weather_forecast
   (Ts TIMESTAMP PRIMARY KEY, Temperature DECIMAL, Cloud_cover DECIMAL, Wind DECIMAL);
 
 CREATE TABLE ml_models
-  (Model_id SERIAL PRIMARY KEY, Model_name VARCHAR(100), Time_creation TIMESTAMP default CURRENT_TIMESTAMP, Configurations json NOT NUll, Owner INTEGER);
-
+  (Model_id SERIAL PRIMARY KEY, Model_name VARCHAR(100), Time_creation TIMESTAMP default CURRENT_TIMESTAMP, Configurations json NOT NUll, Owner INTEGER, Status BOOLEAN default FALSE);
 
 -- Select all för alla tabels
 SELECT * FROM weather_data;
