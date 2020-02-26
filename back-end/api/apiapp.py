@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_restful import Resource, Api, reqparse, abort
-import json, random
+import json, random, re
 
 app = Flask(__name__)
 api = Api(app)
@@ -15,8 +15,17 @@ createModelParser.add_argument('train-split', type=int, help='Training Split')
 createModelParser.add_argument('validation-split', type=int, help='Validation Split')
 createModelParser.add_argument('API-KEY', type=str, help='Authentication')
 
+# Arguments required to update forecast
+updateForecastParser = reqparse.RequestParser()
+updateForecastParser.add_argument('timestamp', type=str)
+updateForecastParser.add_argument('wind', type=int)
+updateForecastParser.add_argument('temperature', type=int)
+updateForecastParser.add_argument('cloud-cover', type=int)
+updateForecastParser.add_argument('API-KEY', type=str)
+
 # Sample post request
-# curl http://localhost:5000/api/v0/project -d "modelID=RF004" -d "model-type=RandomForest" -d "learning-rate=0.5" -d "max-depth=10" -d "train-split=75" -d "validation-split=25" -d "API-KEY=MVK123" -X POST -v
+# curl http://localhost:5000/api/v0/project -d "modelID=RF002" -d "model-type=RandomForest" -d "learning-rate=0.5" -d "max-depth=10" -d "train-split=75" -d "validation-split=25" -d "API-KEY=MVK123" -X POST -v
+# curl http://localhost:5000/api/v0/weather-forecast -d "timestamp=00:00" -d "wind=0" -d "temperature=0" -d "cloud-cover=0" -d "API-KEY=MVK123" -X POST -v 
 
 APIKEY = "MVK123"
 
@@ -49,9 +58,35 @@ TRAINED_MODELS = {
   'RF001': {"model-type": "RandomForest", "learning-rate": 0.5, "max-depth": 8, "train-split": 75, "validation-split": 25, "rmse": 17500},
   'XGB002': {"model-type": "XGBoost", "learning-rate": 0.5, "max-depth": 8, "train-split": 70, "validation-split": 30, "rmse": 20000},
   'XGB003': {"model-type": "XGBoost", "learning-rate": 0.4, "max-depth": 5, "train-split": 80, "validation-split": 20, "rmse": 12500},
-  'LRG001': {"model-type": "LinearRegression", "learning-rate": 0.5, "max-depth": 8, "train-split": 80, "validation-split": 20, "rmse": 10000},
+  'LRG001': {"model-type": "LinearRegression", "learning-rate": 0.5, "max-depth": 8, "train-split": 80, "validation-split": 20, "rmse": 10000}
 }
 
+WEATHER_FORECAST = {
+  '00:00' : {"wind": 5, "temperature": 289, "cloud-cover": 13},
+  '01:00' : {"wind": 6, "temperature": 283, "cloud-cover": 24},
+  '02:00' : {"wind": 7, "temperature": 295, "cloud-cover": 51},
+  '03:00' : {"wind": 5, "temperature": 293, "cloud-cover": 18},
+  '04:00' : {"wind": 6, "temperature": 279, "cloud-cover": 1},
+  '05:00' : {"wind": 5, "temperature": 301, "cloud-cover": 87},
+  '06:00' : {"wind": 4, "temperature": 299, "cloud-cover": 35},
+  '07:00' : {"wind": 3, "temperature": 286, "cloud-cover": 53},
+  '08:00' : {"wind": 2, "temperature": 276, "cloud-cover": 2},
+  '09:00' : {"wind": 0, "temperature": 285, "cloud-cover": 4},
+  '10:00' : {"wind": 0, "temperature": 273, "cloud-cover": 74},
+  '11:00' : {"wind": 8, "temperature": 300, "cloud-cover": 14},
+  '12:00' : {"wind": 7, "temperature": 294, "cloud-cover": 26},
+  '13:00' : {"wind": 6, "temperature": 299, "cloud-cover": 53},
+  '14:00' : {"wind": 4, "temperature": 284, "cloud-cover": 42},
+  '15:00' : {"wind": 3, "temperature": 284, "cloud-cover": 12},
+  '16:00' : {"wind": 2, "temperature": 293, "cloud-cover": 1},
+  '17:00' : {"wind": 1, "temperature": 300, "cloud-cover": 9},
+  '18:00' : {"wind": 1, "temperature": 302, "cloud-cover": 26},
+  '19:00' : {"wind": 1, "temperature": 295, "cloud-cover": 85},
+  '20:00' : {"wind": 0, "temperature": 279, "cloud-cover": 42},
+  '21:00' : {"wind": 8, "temperature": 288, "cloud-cover": 35},
+  '22:00' : {"wind": 3, "temperature": 286, "cloud-cover": 24},
+  '23:00' : {"wind": 5, "temperature": 294, "cloud-cover": 1},
+}
 class ModelResult(Resource):
   def get(self, model_id):
     # Given the model_id, fetch reference info from Database
@@ -65,7 +100,6 @@ class ModelResult(Resource):
     return response, 200
 
 class Project(Resource):
-  # List all trained models
   def get(self):
     return TRAINED_MODELS
 
@@ -94,10 +128,35 @@ class Project(Resource):
       "validation-split": args['validation-split'],
       "rmse": random.randint(10000,30000)
       }
+
+    # sql = """
+    # insert into ml_models (model_name, configurations, owner) 
+    # values (
+    #   %s, \{ model-type: %s\}
+    # """, args['model_name'], args['model-type']
+
     return TRAINED_MODELS[args['modelID']]
+
+class WeatherForecast(Resource):
+  def get(self):
+    return WEATHER_FORECAST
+
+  def post(self):
+    args = updateForecastParser.parse_args(strict=True)
+    if not re.match(r"([0-1]?[0-9]|2[0-3]):00", args['timestamp']): 
+      abort(404,message='Timestamp not right format')
+    if args['API-KEY'] != APIKEY:
+      abort(404, message='unauthorized')
+    WEATHER_FORECAST[args['timestamp']] = {
+      "wind": args["wind"], 
+      "temperature": args["temperature"], 
+      "cloud-cover": args["cloud-cover"]
+    }
+    return WEATHER_FORECAST[args['timestamp']]
 
 api.add_resource(ModelResult, '/api/v0/model-result/<model_id>')
 api.add_resource(Project, '/api/v0/project')
+api.add_resource(WeatherForecast, '/api/v0/weather-forecast')
 
 if __name__ == "__main__":
     app.run(debug=True)
