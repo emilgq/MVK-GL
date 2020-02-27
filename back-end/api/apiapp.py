@@ -154,7 +154,7 @@ class WeatherForecast(Resource):
     }
     return WEATHER_FORECAST[args['timestamp']]
 
-api.add_resource(ModelResult, '/api/v0/model-result/<model_id>')
+api.add_resource(ModelResult, '/api/v0/project/<model_id>')
 api.add_resource(Project, '/api/v0/project')
 api.add_resource(WeatherForecast, '/api/v0/weather-forecast')
 
