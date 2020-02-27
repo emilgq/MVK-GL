@@ -37,6 +37,7 @@ testTimes = ['00:00','01:00','02:00','03:00','04:00','05:00','06:00','07:00','08
 testLearningRate = 0.5
 testMaxDepth = 10
 
+
 # Placeholder data
 TRAINED_MODELS = {
   'XGB001': {"model-type": "XGBoost", "learning-rate": 0.6, "max-depth": 11, "train-split": 80, "validation-split": 20, "rmse": 15000},
@@ -81,7 +82,7 @@ class ModelResult(Resource):
       abort(404, message='model not found')
 
     response = TRAINED_MODELS[model_id]
-    respone['result'] = dict(zip(testTimes, testLoadPrediction))
+    response['result'] = dict(zip(testTimes, testLoadPrediction))
 
     return response, 200
 
