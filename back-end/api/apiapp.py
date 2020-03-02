@@ -81,7 +81,7 @@ class ModelResult(Resource):
     if model_id not in TRAINED_MODELS:
       abort(404, message='model not found')
 
-    response = TRAINED_MODELS[model_id]
+    response = TRAINED_MODELS[model_id].copy()
     response['result'] = dict(zip(testTimes, testLoadPrediction))
 
     return response, 200
