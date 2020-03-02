@@ -1,9 +1,12 @@
 from flask import Flask
 from flask_restful import Resource, Api, reqparse, abort
+# To enable Cross Origin Requests (such as JS .fetch())
+from flask_cors import CORS
 import json, random, re
 
 app = Flask(__name__)
 api = Api(app)
+cors = CORS(app, resources={r"/api/v0/*": {"origins": "*"}})
 
 # Arguments required to train a new model.
 createModelParser = reqparse.RequestParser()
