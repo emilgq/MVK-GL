@@ -12,6 +12,9 @@ CREATE TABLE weather_data (
 
 CREATE TABLE weather_forecast (
     Ts TIMESTAMP PRIMARY KEY,
+    Day INTEGER,
+    Hour INTEGER,
+    Month INTEGER,
     Temperature DECIMAL,
     Cloud_cover DECIMAL,
     Wind DECIMAL
@@ -46,7 +49,7 @@ FROM
 INSERT INTO weather_data (Timestamp, Day, Hour, Month, Temperature, Cloud_cover, Wind, Consumption)
     VALUES ();
 
-INSERT INTO weather_forecast (Timestamp, Temperature, Cloud_cover, Wind)
+INSERT INTO weather_forecast (Timestamp, Day, Hour, Month, Temperature, Cloud_cover, Wind)
     VALUES ();
 
 INSERT INTO ml_models (Model_name, Configurations, Owner)
