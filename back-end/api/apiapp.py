@@ -12,8 +12,6 @@ from reqparsers.adddata import addDataParser
 # Data samples for v0
 from samples import WEATHER_FORECAST, TRAINED_MODELS, WEATHER_DATA
 
-
-
 app = Flask(__name__)
 
 # Enable RESTful framework
@@ -139,3 +137,39 @@ api.add_resource(WeatherData, '/api/v0/weather-data')
 
 if __name__ == "__main__":
     app.run(debug=True)
+<<<<<<< HEAD
+=======
+
+""" 
+In order to integrate the app with the database we'll use the psycopg2 library. 
+
+It provides a cursor class which serves as an interface to the database. 
+
+We'll need a function which takes a parametrized SQL statement, e.g. "SELECT * FROM weather_forecast WHERE timestamp < %s"
+together with the parameters for the desired query and executes the combined statement.
+
+The following procedure should take place(see egq/lms-dbas/ui for reference):
+1. Setup a connection element
+
+Within a try except clause, 
+2. Load configuration parameters of database
+3. Connect and create psycopg2 cursor.
+4. Construct and execute query
+5. Fetch and store result
+6. Commit any potential changes of the transaction
+7. Close cursor
+
+If exception
+8. Throw database error
+
+Finally
+9. Close connection
+
+The return value should either be the resulting table of the query or none, depending on 
+the nature of the query (SELECT/INSERT/DELETE). The cursor returns a list of tuples.
+
+The intended usage of the function is that an endpoint request should trigger a database query. 
+The endpoint function has the query structure stored as a local variable. The query parameters are given either by 
+request header, data or url-parameters (e.g. model_id). 
+"""
+>>>>>>> 0656e476b181c455a5e61b6dbbfbd95c0573ef46
