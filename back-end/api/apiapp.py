@@ -1,6 +1,8 @@
 import json, random, re
 from flask import Flask
 from flask_restful import Resource, Api, reqparse, abort
+import psycopg2
+
 # To enable Cross Origin Requests (such as JS .fetch())
 from flask_cors import CORS
 
@@ -8,6 +10,9 @@ from flask_cors import CORS
 from reqparsers.createmodel import createmodelparser
 from reqparsers.updateforecast import updateforecastparser
 from reqparsers.adddata import addDataParser
+
+# Import database conf and parser
+from config import config
 
 # Data samples for v0
 from samples import WEATHER_FORECAST, TRAINED_MODELS, WEATHER_DATA
@@ -30,7 +35,7 @@ updateForecastParser = updateforecastparser()
 addDataParser = addDataParser()
 
 # Sample post request
-# curl http://localhost:5000/api/v0/project -d "modelID=RF002" -d "model-type=RandomForest" -d "learning-rate=0.5" -d "max-depth=10" -d "train-split=75" -d "validation-split=25" -d "API-KEY=MVK123" -X POST -v
+# curl http://localhost:5000/api/v0/project -d "model-name=RF002" -d "model-type=RandomForest" -d "learning-rate=0.5" -d "max-depth=10" -d "train-split=75" -d "validation-split=25" -d "API-KEY=MVK123" -X POST -v
 # curl http://localhost:5000/api/v0/weather-forecast -d "timestamp=00:00" -d "wind=0" -d "temperature=0" -d "cloud-cover=0" -d "API-KEY=MVK123" -X POST -v
 # curl http://localhost:5000/api/v0/weather-data -d "timestamp=1999-02-02 11:11" -d "day=1" -d "hour=1" -d "month=2" -d "temperature=280" -d "cloud-cover=99" -d "wind=14" -d "consumption=10" -d "API-KEY=MVK123" -X POST -v
 
@@ -38,6 +43,37 @@ addDataParser = addDataParser()
 APIKEY = "MVK123"
 testLoadPrediction = [-300000,-290000,-280000,-270000,-290000,-310000,-300000,-310000,-320000,-330000,-340000,-310000,-320000,-290000,-280000,-300000,-310000,-330000,-300000,-280000,-290000,-280000,-270000,-320000]
 testTimes = ['00:00','01:00','02:00','03:00','04:00','05:00','06:00','07:00','08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00', '20:00', '21:00', '22:00', '23:00']
+
+# Query must be a parametrized SQL Statement - (select * from ml_models where model_name = %s)
+# Paramteres must be a tuple with number of element equal to number of parameters in query. (XGB001)
+def runDBQuery(query, parameters):
+  conn = None
+  query_result = None
+  try:
+    params = config()
+    conn = psycopg2.connect(**params)
+    cur = conn.cursor()
+    cur.execute(query,parameters)
+    try:
+      query_result = cur.fetchall()
+      query_columns = [desc[0] for desc in cur.description]
+    except:
+      pass
+    finally:
+      conn.commit()
+      cur.close()
+
+  except (Exception, psycopg2.DatabaseError) as error:
+    print(error)
+
+  finally:
+    if conn is not None:
+      conn.close()
+      if query_result is None: 
+        return
+      else: 
+        return query_result, query_columns
+
 
 # API Resource for fetching model specific results
 class ModelResult(Resource):
@@ -55,11 +91,23 @@ class ModelResult(Resource):
 # API Resource for fetching information about trained models and creating new instances
 class Project(Resource):
   def get(self):
-    return TRAINED_MODELS
+    query = "select model_id, model_name, time_creation::varchar, configurations, owner, status, rmse from ml_models"
+    parameters = None
+    result, columns = runDBQuery(query, parameters)
+    response = {}
+
+    # Convert list of list to dict of dict with columns as keys
+    for i in range(0, len(result)):
+      response[result[i][0]] = {}
+      for j in range (1, len(result[i])):
+        response[result[i][0]][columns[j]] = result[i][j]
+
+    return response, 200
 
   # Create new Machine Learning Model
   def post(self):
     args = createModelParser.parse_args(strict=True)
+
     if args['API-KEY'] != APIKEY:
       abort(404, message='unauthorized')
     if args['model-type'] not in ['XGBoost', 'RandomForest', 'LinearRegression']:
@@ -68,28 +116,24 @@ class Project(Resource):
       abort(404,message='Learning rate must be between 0 and 1')
     if args['max-depth'] > 15:
       abort(404,message='Max depth is capped at 15')
-    if args['modelID'] in TRAINED_MODELS:
-      abort(404,message='Model ID already taken')
     if (args['train-split']+args['validation-split'] != 100):
       abort(404,message='Split must total to 100')
+
     # Run machine learning module
+
     # Fetch reference from database
-    TRAINED_MODELS[args['modelID']] = {
+    query = "insert into ml_models (model_name, configurations, owner) values (%s,%s,%s)"
+    configurations = {
       "model-type": args['model-type'],
       "learning-rate": args['learning-rate'],
       "max-depth": args['max-depth'],
       "train-split": args['train-split'],
-      "validation-split": args['validation-split'],
-      "rmse": random.randint(10000,30000)
-      }
-
-    # sql = """
-    # insert into ml_models (model_name, configurations, owner)
-    # values (
-    #   %s, \{ model-type: %s\}
-    # """, args['model_name'], args['model-type']
-
-    return TRAINED_MODELS[args['modelID']]
+      "validation-split": args['validation-split'] 
+    }
+    parameters = (args['model-name'], json.dumps(configurations), 1337,)
+    runDBQuery(query, parameters)
+    message = 'successful model creation'
+    return message, 200
 
 # API Resource for fetching the weather forecast and updating it with new data
 class WeatherForecast(Resource):
@@ -127,6 +171,8 @@ class WeatherData(Resource):
       "wind": args["wind"],
       "consumption": args["consumption"]
     }
+    # queryParameter = 
+    # runDBQuery("insert into....%s", (args["day"],))
     return WEATHER_DATA[args['timestamp']]
 
 
