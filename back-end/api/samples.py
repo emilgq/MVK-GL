@@ -32,3 +32,7 @@ WEATHER_FORECAST = {
   '22:00' : {"wind": 3, "temperature": 286, "cloud-cover": 24},
   '23:00' : {"wind": 5, "temperature": 294, "cloud-cover": 1},
 }
+
+WEATHER_DATA = {
+  '1998-01-01 00:00' : {"day": 0, "hour": 0, "month": 1, "temperature": 275, "cloud_cover": 50, "wind": 6, "Consumption": 30} 
+}

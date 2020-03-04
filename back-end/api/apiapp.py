@@ -7,9 +7,10 @@ from flask_cors import CORS
 # Import application-specific argument parsers
 from reqparsers.createmodel import createmodelparser
 from reqparsers.updateforecast import updateforecastparser
+from reqparsers.adddata import addDataParser
 
 # Data samples for v0
-from samples import WEATHER_FORECAST, TRAINED_MODELS
+from samples import WEATHER_FORECAST, TRAINED_MODELS, WEATHER_DATA
 
 
 
@@ -27,9 +28,13 @@ createModelParser = createmodelparser()
 # Arguments parser for updating weather forecast.
 updateForecastParser = updateforecastparser()
 
+# Arguments parser for adding data
+addDataParser = addDataParser()
+
 # Sample post request
 # curl http://localhost:5000/api/v0/project -d "modelID=RF002" -d "model-type=RandomForest" -d "learning-rate=0.5" -d "max-depth=10" -d "train-split=75" -d "validation-split=25" -d "API-KEY=MVK123" -X POST -v
-# curl http://localhost:5000/api/v0/weather-forecast -d "timestamp=00:00" -d "wind=0" -d "temperature=0" -d "cloud-cover=0" -d "API-KEY=MVK123" -X POST -v 
+# curl http://localhost:5000/api/v0/weather-forecast -d "timestamp=00:00" -d "wind=0" -d "temperature=0" -d "cloud-cover=0" -d "API-KEY=MVK123" -X POST -v
+# curl http://localhost:5000/api/v0/weather-data -d "timestamp=1999-02-02 11:11" -d "day=1" -d "hour=1" -d "month=2" -d "temperature=280" -d "cloud-cover=99" -d "wind=14" -d "consumption=10" -d "API-KEY=MVK123" -X POST -v
 
 # Sample data
 APIKEY = "MVK123"
@@ -61,7 +66,7 @@ class Project(Resource):
       abort(404, message='unauthorized')
     if args['model-type'] not in ['XGBoost', 'RandomForest', 'LinearRegression']:
       abort(404,message='Model type \"{}\" is not provided in this application. Select \"XGBoost\", \"RandomForest\" or \"LinearRegression\"'.format(args['model-type']))
-    if ((args['learning-rate'] <= 0) or (args['learning-rate'] >= 1)): 
+    if ((args['learning-rate'] <= 0) or (args['learning-rate'] >= 1)):
       abort(404,message='Learning rate must be between 0 and 1')
     if args['max-depth'] > 15:
       abort(404,message='Max depth is capped at 15')
@@ -72,16 +77,16 @@ class Project(Resource):
     # Run machine learning module
     # Fetch reference from database
     TRAINED_MODELS[args['modelID']] = {
-      "model-type": args['model-type'], 
-      "learning-rate": args['learning-rate'], 
-      "max-depth": args['max-depth'], 
+      "model-type": args['model-type'],
+      "learning-rate": args['learning-rate'],
+      "max-depth": args['max-depth'],
       "train-split": args['train-split'],
       "validation-split": args['validation-split'],
       "rmse": random.randint(10000,30000)
       }
 
     # sql = """
-    # insert into ml_models (model_name, configurations, owner) 
+    # insert into ml_models (model_name, configurations, owner)
     # values (
     #   %s, \{ model-type: %s\}
     # """, args['model_name'], args['model-type']
@@ -95,20 +100,42 @@ class WeatherForecast(Resource):
 
   def post(self):
     args = updateForecastParser.parse_args(strict=True)
-    if not re.match(r"([0-1]?[0-9]|2[0-3]):00", args['timestamp']): 
+    if not re.match(r"([0-1]?[0-9]|2[0-3]):00", args['timestamp']):
       abort(404,message='Timestamp not right format')
     if args['API-KEY'] != APIKEY:
       abort(404, message='unauthorized')
     WEATHER_FORECAST[args['timestamp']] = {
-      "wind": args["wind"], 
-      "temperature": args["temperature"], 
+      "wind": args["wind"],
+      "temperature": args["temperature"],
       "cloud-cover": args["cloud-cover"]
     }
     return WEATHER_FORECAST[args['timestamp']]
 
+# API Resource for fetching the weather data and adding it to the database
+class WeatherData(Resource):
+  def get(self):
+    return WEATHER_DATA
+
+  def post(self):
+    args = addDataParser.parse_args(strict=True)
+    #if ()  #timestamp not right format
+     # abort(404,message='Timestamp not right format')
+    WEATHER_DATA[args['timestamp']] = {
+      "day": args["day"],
+      "hour": args["hour"],
+      "month": args["month"],
+      "temperature": args["temperature"],
+      "cloud-cover": args["cloud-cover"],
+      "wind": args["wind"],
+      "consumption": args["consumption"]
+    }
+    return WEATHER_DATA[args['timestamp']]
+
+
 api.add_resource(ModelResult, '/api/v0/project/<model_id>')
 api.add_resource(Project, '/api/v0/project')
 api.add_resource(WeatherForecast, '/api/v0/weather-forecast')
+api.add_resource(WeatherData, '/api/v0/weather-data')
 
 if __name__ == "__main__":
     app.run(debug=True)
