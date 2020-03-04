@@ -137,8 +137,6 @@ api.add_resource(WeatherData, '/api/v0/weather-data')
 
 if __name__ == "__main__":
     app.run(debug=True)
-<<<<<<< HEAD
-=======
 
 """ 
 In order to integrate the app with the database we'll use the psycopg2 library. 
@@ -172,4 +170,3 @@ The intended usage of the function is that an endpoint request should trigger a 
 The endpoint function has the query structure stored as a local variable. The query parameters are given either by 
 request header, data or url-parameters (e.g. model_id). 
 """
->>>>>>> 0656e476b181c455a5e61b6dbbfbd95c0573ef46
