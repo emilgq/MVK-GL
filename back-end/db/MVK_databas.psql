@@ -26,7 +26,8 @@ CREATE TABLE ml_models (
     Time_creation TIMESTAMP default CURRENT_TIMESTAMP,
     Configurations json NOT NUll,
     Owner INTEGER,
-    Status BOOLEAN default FALSE
+    Status BOOLEAN default FALSE,
+    Rmse DECIMAL default NULL
 );
 
 -- Select all för alla tabels
