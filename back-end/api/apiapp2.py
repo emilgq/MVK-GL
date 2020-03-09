@@ -1,4 +1,4 @@
-import random, re
+import random, re, datetime
 from flask import Flask, json, abort, request, Response
 from flask_restful import reqparse
 import psycopg2
@@ -32,12 +32,9 @@ updateForecastParser = updateforecastparser()
 addDataParser = addDataParser()
 
 # Sample post request
-# curl http://localhost:5000/api/v0/project -d "model-name=XXXXX" -d "model-type=RandomForest" -d "learning-rate=0.5" -d "max-depth=10" -d "train-split=75" -d "validation-split=25" -d "API-KEY=MVK123" -X POST -v
-# curl http://localhost:5000/api/v0/project -d '{"model-name": "XXXXX", "model-type": "RandomForest", "learning-rate": 0.5, "max-depth":10, "train-split": 75, "validation-split": 25, "API-KEY": "MVK123"}' -X POST -v
-
-
-# curl http://localhost:5000/api/v0/weather-forecast -d "timestamp=00:00" -d "wind=0" -d "temperature=0" -d "cloud-cover=0" -d "API-KEY=MVK123" -X POST -v
-# curl http://localhost:5000/api/v0/weather-data -d "timestamp=1999-02-02 11:11" -d "day=1" -d "hour=1" -d "month=2" -d "temperature=280" -d "cloud-cover=99" -d "wind=14" -d "consumption=10" -d "API-KEY=MVK123" -X POST -v
+# curl http://localhost:5000/api/v0/project -d '{"model-name": "XXXXX", "model-type": "RandomForest", "learning-rate": 0.5, "max-depth":10, "train-split": 75, "validation-split": 25, "API-KEY": "MVK123"}' -X POST -v -H "Content-Type: application/json"
+# curl http://localhost:5000/api/v0/weather-forecast -d '{"timestamp":"00:00", "wind": 0, "temperature": 0, "cloud-cover": 0, "API-KEY":"MVK123"}' -X POST -v -H "Content-Type: application/json"
+# curl http://localhost:5000/api/v0/weather-data -d '{"timestamp":"1999-02-02 11:11", "day": 1, "hour":1, "month":2, "temperature":280, "cloud-cover":99, "wind":14, "consumption":10, "API-KEY":"MVK123"}' -X POST -v -H "Content-Type: application/json"
 
 # Sample data
 APIKEY = "MVK123"
@@ -65,6 +62,7 @@ def runDBQuery(query, parameters):
 
   except (Exception, psycopg2.DatabaseError) as error:
     print(error)
+    raise Exception(error)
 
   finally:
     if conn is not None:
@@ -107,15 +105,15 @@ def project():
   # Create new Machine Learning Model
     args = request.get_json()
     if args['API-KEY'] != APIKEY:
-      abort(404, message='unauthorized')
+      abort(Response('unauthorized',400))
     if args['model-type'] not in ['XGBoost', 'RandomForest', 'LinearRegression']:
-      abort(404,message='Model type \"{}\" is not provided in this application. Select \"XGBoost\", \"RandomForest\" or \"LinearRegression\"'.format(args['model-type']))
+      abort(Response('Model type \"{}\" is not provided in this application. Select \"XGBoost\", \"RandomForest\" or \"LinearRegression\"'.format(args['model-type']),400))
     if ((args['learning-rate'] <= 0) or (args['learning-rate'] >= 1)):
-      abort(404,message='Learning rate must be between 0 and 1')
+      abort(Response('Learning rate must be between 0 and 1',400))
     if args['max-depth'] > 15:
-      abort(404,message='Max depth is capped at 15')
+      abort(Response('Max depth is capped at 15',400))
     if (args['train-split']+args['validation-split'] != 100):
-      abort(404,message='Split must total to 100')
+      abort(Response('Split must total to 100',400))
 
     # Run machine learning module
 
@@ -138,63 +136,73 @@ def project():
       abort(Response('Invalid argument. Error: {}'.format(e), 400))
     
 
-# # API Resource for fetching the weather forecast and updating it with new data
-# @app.route('/api/v0/weather-forecast', methods=['GET', 'POST'])
-# class WeatherForecast(Resource):
-#   def get(self):
-#     return WEATHER_FORECAST
+# API Resource for fetching the weather forecast and updating it with new data
+@app.route('/api/v0/weather-forecast', methods=['GET', 'POST'])
+def weatherForecast():
+  if request.method == 'GET':
+    return WEATHER_FORECAST
 
-#   def post(self):
-#     args = updateForecastParser.parse_args(strict=True)
-#     if not re.match(r"([0-1]?[0-9]|2[0-3]):00", args['timestamp']):
-#       abort(404,message='Timestamp not right format')
-#     if args['API-KEY'] != APIKEY:
-#       abort(404, message='unauthorized')
-#     WEATHER_FORECAST[args['timestamp']] = {
-#       "wind": args["wind"],
-#       "temperature": args["temperature"],
-#       "cloud-cover": args["cloud-cover"]
-#     }
-#     return WEATHER_FORECAST[args['timestamp']]
+  if request.method == 'POST':
+    args = request.get_json()
+    if not re.match(r"([0-1]?[0-9]|2[0-3]):00", args['timestamp']):
+      abort(404,message='Timestamp not right format')
+    if args['API-KEY'] != APIKEY:
+      abort(404, message='unauthorized')
+    WEATHER_FORECAST[args['timestamp']] = {
+      "wind": args["wind"],
+      "temperature": args["temperature"],
+      "cloud-cover": args["cloud-cover"]
+    }
+    return WEATHER_FORECAST[args['timestamp']]
 
-# # API Resource for fetching the weather data and adding it to the database
-# @app.route('/api/v0/weather-data', methods=['GET', 'POST'])
-# class WeatherData(Resource):
-#   def get(self):
-#     query = "select ts, day, hour, month, temperature, cloud_cover, wind, consumption from weather_data"
-#     parameters = None
-#     result, _ = runDBQuery(query, parameters)
-#     response = []
-#     # Convert list of list to dict of dict with columns as keys
-#     for i in range(0, len(result)):
-#       response.append([])
-#       for j in range (0, len(result[i])):
-#         if j == 0:
-#           response[i].append(result[i][j].isoformat())
-#         else:
-#           response[i].append(result[i][j])
+# API Resource for fetching the weather data and adding it to the database
+@app.route('/api/v0/weather-data', methods=['GET', 'POST'])
+def weatherData():
+  if request.method == 'GET':
+    query = "select ts, day, hour, month, temperature, cloud_cover, wind, consumption from weather_data"
+    parameters = None
+    result, _ = runDBQuery(query, parameters)
+    response = []
+    # Convert list of list to dict of dict with columns as keys
+    for i in range(0, len(result)):
+      response.append([])
+      for j in range (0, len(result[i])):
+        if j == 0:
+          response[i].append(result[i][j].isoformat())
+        else:
+          response[i].append(result[i][j])
+    return json.dumps(response), 200
 
-#     return response, 200
+  if request.method == 'POST':
+    args = request.get_json()
+    # Validate given arguments
+    # Check timestamp format YYYY-MM-DD HH:00
+    if not re.match(r"\d\d\d\d-(0?[1-9]|1[0-2])-(0?[1-9]|[12][0-9]|3[01]) (0[0-9]|1[0-9]|2[0-3]):00", args['ts']):
+      abort('Timestamp not right format', 400)
+    # Check decimal values
+    try:
+      temp = float(args['temperature'])
+      wind = float(args['wind'])
+      cc = float(args['cloud-cover'])
+      load = float(args['consumption'])
+    except:
+      abort(Response('Type Error of weather metrics or load'), 400)
+    ts = datetime.datetime.strptime(args['ts'], '%Y-%m-%d %H:%M')
 
-#   def post(self):
-#     args = addDataParser.parse_args(strict=True)
-#     #if ()  #timestamp not right format
-#      # abort(404,message='Timestamp not right format')
-#     # Check timestamp format
-#     # Extract timestamp dow, hod, moy
-#     # Run insert query to weahter_data
-#     WEATHER_DATA[args['timestamp']] = {
-#       "day": args["day"],
-#       "hour": args["hour"],
-#       "month": args["month"],
-#       "temperature": args["temperature"],
-#       "cloud-cover": args["cloud-cover"],
-#       "wind": args["wind"],
-#       "consumption": args["consumption"]
-#     }
-#     # queryParameter = 
-#     # runDBQuery("insert into....%s", (args["day"],))
-#     return WEATHER_DATA[args['timestamp']]
+    # Extract datetime specifics
+    dow = datetime.datetime.weekday(ts)
+    hod = ts.hour
+    moy = ts.month
+    query = "insert into weather_data (ts, day, hour, month, temperature, cloud_cover, wind, consumption) values (%s,%s,%s,%s,%s,%s,%s,%s)"
+    parameters = (ts, dow, hod, moy, temp, cc, wind, load,)
+    
+    # Run insert query to weather_data
+    try:
+      runDBQuery(query, parameters)
+      message = 'data point successfully added'
+      return message, 200
+    except Exception as e:
+      abort(Response('Error: {}'.format(e), 400))
 
 if __name__ == "__main__":
     app.run(debug=True)
