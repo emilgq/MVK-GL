@@ -84,7 +84,7 @@ def modelresult(model_id):
       query = "delete from ml_models where model_id = %s"
       runDBQuery(query, (model_id,))
       # Add function which removes save model from filesystem if model is trained or abort training in case still training
-      return Response(json.dumps({"message": "Succesfully deleted model with id: {}".format(model_id)}), 400)
+      return Response(json.dumps({"message": "Succesfully deleted model with id: {}".format(model_id)}), 200)
     except Exception as e:
       abort(Response('Error: {}'.format(e), 400))
 
