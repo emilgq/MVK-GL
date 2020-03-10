@@ -19,7 +19,7 @@ cors = CORS(app, resources={r"/api/v0/*": {"origins": "*"}})
 # Sample post request
 # curl http://localhost:5000/api/v0/project -d '{"model-name": "XXXXX", "model-type": "RandomForest", "learning-rate": 0.5, "max-depth":10, "train-split": 75, "validation-split": 25, "API-KEY": "MVK123"}' -X POST -v -H "Content-Type: application/json"
 # curl http://localhost:5000/api/v0/weather-forecast -d '{"timestamp":"2021-02-02 11:00", "wind": 0, "temperature": 0, "cloud-cover": 0, "API-KEY":"MVK123"}' -X POST -v -H "Content-Type: application/json"
-# curl http://localhost:5000/api/v0/weather-data -d '{"timestamp":"1999-02-02 11:11", "temperature":280, "cloud-cover":99, "wind":14, "consumption":10, "API-KEY":"MVK123"}' -X POST -v -H "Content-Type: application/json"
+# curl http://localhost:5000/api/v0/weather-data -d '{"timestamp":"1999-02-02 11:00", "temperature":280, "cloud-cover":99, "wind":14, "consumption":10, "API-KEY":"MVK123"}' -X POST -v -H "Content-Type: application/json"
 
 # Sample data
 APIKEY = "MVK123"
@@ -214,6 +214,7 @@ def weatherData():
     except:
       abort(Response(json.dumps({"message": "Type Error of weather metrics or load"}), 400))
     
+    # Convert string to datetime object
     ts = datetime.datetime.strptime(args['timestamp'], '%Y-%m-%d %H:%M')
 
     # Extract datetime specifics
