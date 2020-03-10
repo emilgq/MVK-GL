@@ -1,5 +1,5 @@
-import json, random, re
-from flask import Flask
+import random, re
+from flask import Flask, json
 from flask_restful import Resource, Api, reqparse, abort
 import psycopg2
 
@@ -131,6 +131,7 @@ class Project(Resource):
       "validation-split": args['validation-split'] 
     }
     parameters = (args['model-name'], json.dumps(configurations), 1337,)
+    # Embed in try/except
     runDBQuery(query, parameters)
     message = 'successful model creation'
     return message, 200
@@ -156,12 +157,28 @@ class WeatherForecast(Resource):
 # API Resource for fetching the weather data and adding it to the database
 class WeatherData(Resource):
   def get(self):
-    return WEATHER_DATA
+    query = "select ts, day, hour, month, temperature, cloud_cover, wind, consumption from weather_data"
+    parameters = None
+    result, _ = runDBQuery(query, parameters)
+    response = []
+    # Convert list of list to dict of dict with columns as keys
+    for i in range(0, len(result)):
+      response.append([])
+      for j in range (0, len(result[i])):
+        if j == 0:
+          response[i].append(result[i][j].isoformat())
+        else:
+          response[i].append(result[i][j])
+
+    return response, 200
 
   def post(self):
     args = addDataParser.parse_args(strict=True)
     #if ()  #timestamp not right format
      # abort(404,message='Timestamp not right format')
+    # Check timestamp format
+    # Extract timestamp dow, hod, moy
+    # Run insert query to weahter_data
     WEATHER_DATA[args['timestamp']] = {
       "day": args["day"],
       "hour": args["hour"],
