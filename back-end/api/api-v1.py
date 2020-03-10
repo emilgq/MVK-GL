@@ -8,18 +8,18 @@ from flask_cors import CORS
 # Import database conf and parser
 from config import config
 
-# Data samples for v0
-from samples import WEATHER_FORECAST, TRAINED_MODELS, WEATHER_DATA
-
 app = Flask(__name__)
 
 # Enable JavaScript Fetch
-cors = CORS(app, resources={r"/api/v0/*": {"origins": "*"}})
+cors = CORS(app, resources={r"/api/v1/*": {"origins": "*"}})
 
 # Sample post request
-# curl http://localhost:5000/api/v0/project -d '{"model-name": "XXXXX", "model-type": "RandomForest", "learning-rate": 0.5, "max-depth":10, "train-split": 75, "validation-split": 25, "API-KEY": "MVK123"}' -X POST -v -H "Content-Type: application/json"
-# curl http://localhost:5000/api/v0/weather-forecast -d '{"timestamp":"2021-02-02 11:00", "wind": 0, "temperature": 0, "cloud-cover": 0, "API-KEY":"MVK123"}' -X POST -v -H "Content-Type: application/json"
-# curl http://localhost:5000/api/v0/weather-data -d '{"timestamp":"1999-02-02 11:00", "temperature":280, "cloud-cover":99, "wind":14, "consumption":10, "API-KEY":"MVK123"}' -X POST -v -H "Content-Type: application/json"
+# curl http://localhost:5000/api/v1/project -d '{"model-name": "XXXXX", "model-type": "RandomForest", "learning-rate": 0.5, "max-depth":10, "train-split": 75, "validation-split": 25, "API-KEY": "MVK123"}' -X POST -v -H "Content-Type: application/json"
+# curl http://localhost:5000/api/v1/weather-forecast -d '{"timestamp":"2021-02-02 11:00", "wind": 0, "temperature": 0, "cloud-cover": 0, "API-KEY":"MVK123"}' -X POST -v -H "Content-Type: application/json"
+# curl http://localhost:5000/api/v1/weather-data -d '{"timestamp":"1999-02-02 11:00", "temperature":280, "cloud-cover":99, "wind":14, "consumption":10, "API-KEY":"MVK123"}' -X POST -v -H "Content-Type: application/json"
+
+# Sample delete request, replace X with desired model_id to delete
+# curl http://localhost:5000/api/v1/project/X -d '{"API-KEY":"MVK123"}' -X DELETE -v -H "Content-Type: application/json"
 
 # Sample data
 APIKEY = "MVK123"
@@ -56,7 +56,7 @@ def runDBQuery(query, parameters):
     raise Exception(error)
 
 # API Resource for fetching model specific results
-@app.route('/api/v1/project/<model_id>', methods=['GET'])
+@app.route('/api/v1/project/<model_id>', methods=['GET', 'DELETE'])
 def modelresult(model_id):
   if request.method == 'GET':
     # Given the model_id, fetch reference info from Database
@@ -74,6 +74,21 @@ def modelresult(model_id):
     # Add result column
     response['result'] = dict(zip(testTimes, testLoadPrediction))
     return json.dumps(response), 200
+  
+  # Remove model
+  if request.method == 'DELETE':
+    args = request.get_json()
+    try:
+      if args['API-KEY'] != APIKEY:
+        abort(Response('Unauthorized', 400))
+      query = "delete from ml_models where model_id = %s"
+      runDBQuery(query, (model_id,))
+      # Add function which removes save model from filesystem if model is trained or abort training in case still training
+      return Response(json.dumps({"message": "Succesfully deleted model with id: {}".format(model_id)}), 400)
+    except Exception as e:
+      abort(Response('Error: {}'.format(e), 400))
+
+
 
 # API Resource for fetching information about trained models and creating new instances
 @app.route('/api/v1/project', methods=['GET', 'POST'])
