@@ -56,7 +56,7 @@ def runDBQuery(query, parameters):
     raise Exception(error)
 
 # API Resource for fetching model specific results
-@app.route('/api/v0/project/<model_id>', methods=['GET'])
+@app.route('/api/v1/project/<model_id>', methods=['GET'])
 def modelresult(model_id):
   if request.method == 'GET':
     # Given the model_id, fetch reference info from Database
@@ -76,7 +76,7 @@ def modelresult(model_id):
     return json.dumps(response), 200
 
 # API Resource for fetching information about trained models and creating new instances
-@app.route('/api/v0/project', methods=['GET', 'POST'])
+@app.route('/api/v1/project', methods=['GET', 'POST'])
 def project():
   if request.method == 'GET':
     query = "select * from ml_models"
@@ -127,7 +127,7 @@ def project():
     
 
 # API Resource for fetching the weather forecast and updating it with new data
-@app.route('/api/v0/weather-forecast', methods=['GET', 'POST'])
+@app.route('/api/v1/weather-forecast', methods=['GET', 'POST'])
 def weatherForecast():
   if request.method == 'GET':
     query = "select * from weather_forecast"
@@ -182,7 +182,7 @@ def weatherForecast():
       abort(Response('Error: {}'.format(e), 400))
 
 # API Resource for fetching the weather data and adding it to the database
-@app.route('/api/v0/weather-data', methods=['GET', 'POST'])
+@app.route('/api/v1/weather-data', methods=['GET', 'POST'])
 def weatherData():
   if request.method == 'GET':
     query = "select * from weather_data"
