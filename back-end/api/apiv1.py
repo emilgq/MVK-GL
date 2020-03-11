@@ -16,15 +16,7 @@ cors = CORS(app, resources={r"/api/v1/*": {"origins": "*"}})
 # Sample post request
 # curl http://localhost:5000/api/v1/project -d '{"model-name": "XXXXX", "model-type": "RandomForest", "learning-rate": 0.5, "max-depth":10, "train-split": 75, "validation-split": 25, "API-KEY": "MVK123"}' -X POST -v -H "Content-Type: application/json"
 # curl http://localhost:5000/api/v1/weather-forecast -d '{"timestamp":"2021-02-02 11:00", "wind": 0, "temperature": 0, "cloud-cover": 0, "API-KEY":"MVK123"}' -X POST -v -H "Content-Type: application/json"
-# curl http://localhost:5000/api/v1/weather-data -d '
-# {
-# "timestamp":"1999-02-02 11:00", 
-# "temperature":280, 
-# "cloud-cover":99, 
-# "wind":14, 
-# "consumption":10, 
-# "API-KEY":"MVK123"
-# }' -X POST -v -H "Content-Type: application/json"
+# curl http://localhost:5000/api/v1/weather-data -d '{"timestamp":"2999-02-02 11:00", "temperature":280, "cloud-cover":99, "wind":14, "consumption":10, "API-KEY":"MVK123"}' -X POST -v -H "Content-Type: application/json"
 
 # Sample delete request, replace X with desired model_id to delete
 # curl http://localhost:5000/api/v1/project/X -d '{"API-KEY":"MVK123"}' -X DELETE -v -H "Content-Type: application/json"
@@ -220,7 +212,7 @@ def weatherData():
           response[i].append(result[i][j].isoformat())
         else:
           response[i].append(result[i][j])
-    return json.dumps(response), 200
+    return Response(json.dumps(response), 200)
 
   if request.method == 'POST':
     args = request.get_json()
