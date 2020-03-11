@@ -18,7 +18,7 @@ cors = CORS(app, resources={r"/api/v1/*": {"origins": "*"}})
 # curl http://localhost:5000/api/v1/weather-forecast -d '{"timestamp":"2021-02-02 11:00", "wind": 0, "temperature": 0, "cloud-cover": 0, "API-KEY":"MVK123"}' -X POST -v -H "Content-Type: application/json"
 # curl http://localhost:5000/api/v1/weather-data -d '
 # {
-# "timestamp":"1999-02-02 11:00", 
+# "timestamp":"1999-02-02 11:00:00", 
 # "temperature":280, 
 # "cloud-cover":99, 
 # "wind":14, 
@@ -225,8 +225,8 @@ def weatherData():
   if request.method == 'POST':
     args = request.get_json()
     # Validate given arguments
-    # Check timestamp format YYYY-MM-DD HH:00:00
-    if not re.match(r"\d\d\d\d-(0?[1-9]|1[0-2])-(0?[1-9]|[12][0-9]|3[01]) (0[0-9]|1[0-9]|2[0-3]):00:00", args['timestamp']):
+    # Check timestamp format YYYY-MM-DD HH:00
+    if not re.match(r"\d\d\d\d-(0?[1-9]|1[0-2])-(0?[1-9]|[12][0-9]|3[01]) (0[0-9]|1[0-9]|2[0-3]):00", args['timestamp']):
       abort('Timestamp not right format', 400)
     # Check decimal values
     try:
@@ -238,7 +238,7 @@ def weatherData():
       abort(Response(json.dumps({"message": "Type Error of weather metrics or load"}), 400))
     
     # Convert string to datetime object
-    ts = datetime.datetime.strptime(args['timestamp'], '%Y-%m-%d %H:%M:%S')
+    ts = datetime.datetime.strptime(args['timestamp'], '%Y-%m-%d %H:%M')
 
     # Extract datetime specifics
     dow = datetime.datetime.weekday(ts)
