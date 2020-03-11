@@ -18,7 +18,7 @@ cors = CORS(app, resources={r"/api/v1/*": {"origins": "*"}})
 # curl http://localhost:5000/api/v1/weather-forecast -d '{"timestamp":"2021-02-02 11:00", "wind": 0, "temperature": 0, "cloud-cover": 0, "API-KEY":"MVK123"}' -X POST -v -H "Content-Type: application/json"
 # curl http://localhost:5000/api/v1/weather-data -d '
 # {
-# "timestamp":"1999-02-02 11:00:00", 
+# "timestamp":"1999-02-02 11:00", 
 # "temperature":280, 
 # "cloud-cover":99, 
 # "wind":14, 
