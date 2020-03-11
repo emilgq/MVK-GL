@@ -204,13 +204,10 @@ def weatherData():
     parameters = None
     result, _ = runDBQuery(query, parameters)
     response = []
-    # Convert list of list to dict of dict with columns as keys
+    # Create matrix of weather & load data
     for i in range(0, len(result)):
       response.append([])
       for j in range (0, len(result[i])):
-        if j == 0:
-          response[i].append(result[i][j].isoformat())
-        else:
           response[i].append(result[i][j])
     return Response(json.dumps(response), 200)
 
