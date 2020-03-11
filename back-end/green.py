@@ -6,10 +6,10 @@ import json
 from datetime import datetime
 import dateutil.parser
 
-
-# Stockholms kordinater på en höjd av 59
+# Greenlytics API
+# Weather for Stockholm coordinates. Returns Temperature, cloudcoverage and wind.
 endpoint_url = "https://api.greenlytics.io/weather/v1/get_nwp"
-headers = {"Authorization": ""}
+headers = {"Authorization": "1iqsmV9rE6UhCkyzosBpROkGVgv0BrQ87aCPqLtV4VrBPwf0HbSESt8twLuDj3lrKUmj9sSe"}
 params = {
     'model': 'DWD_ICON-EU',
     'start_date': '2019-05-15 00',
@@ -18,8 +18,13 @@ params = {
     'variables': ['T', 'CLCT','V'],
     'as_dataframe': True
 }
+# greenlytics
+responseGL = requests.get(endpoint_url, headers=headers, params={'query_params': json.dumps(params)})
+df_green = pd.read_json(responseGL.text)
 
-#SVK
+
+# SVK API
+# Energy Load i MKWh for Stockholm area.
 date_start = '2019-05-15'
 date_end = '2019-05-16'
 area = 'STH'
@@ -32,18 +37,13 @@ url = url_base+url_target
 df_load = pd.read_csv(url, sep=';', header=1, decimal=',', usecols=[0,1], names=['Datetime', 'Load'])
 df_load = df_load[:-1]
 df_load.index = pd.to_datetime(df_load['Datetime'])
-#df_load = df_load.drop(columns='Datetime')
 df_load['Load'] = -df_load['Load']/10**3
 
-# greenlytics
-response = requests.get(endpoint_url, headers=headers, params={'query_params': json.dumps(params)})
-df_green = pd.read_json(response.text)
 
 
 #print
 dategl = dateutil.parser.parse(df_green['valid_datetime'][1])
 #dateygl = datetime.strptime((df_green['valid_datetime'][1]), "%Y-%m-%d %H:%M")
-print(type(dategl))
 
 # Adds column with as a datetime object where timezone is removed. Makes it possible to compare dataframes
 df_green['date_valid_datetime'] = [(dateutil.parser.parse(row)).replace(tzinfo=None) for row in df_green['valid_datetime']]
@@ -51,9 +51,8 @@ df_green['date_valid_datetime'] = [(dateutil.parser.parse(row)).replace(tzinfo=N
 # Adds column with date as a datetime object. Makes it possible to compare dataframes
 df_load['date_Datetime'] = [(dateutil.parser.parse(rows)) for rows in df_load['Datetime']]
 
-#print(df_green)
-#print(df_load)
 
+# Merges on the datetime type where they're equal. Keeps both of the columns.
 mergedSets = pd.merge(
     df_load,
     df_green,
@@ -61,33 +60,17 @@ mergedSets = pd.merge(
     right_on=['date_valid_datetime']
 )
 
-print(mergedSets)
-#MAKES datetime from str to datetime, used to get weekday of%H:%M"
-#datey = datetime.strptime((df_load['Datetime'][1]), "%Y-%m-%d%t%H:%M")
-# print(datey)
-
-#df["time_column_name"] = df["time_column_name"].apply(lambda x: datetime.datetime.strptime(x , "datetime_format"))
-
-
-# print("Tempeture at heigt 59 is %s and CloudCoverage is %s" % (df['T_height_59'],df['CLCT']))
-#print(type(df_load['Datetime'][1]))
+# Posts the merged dataframe to rest-API
 for i in range(len(mergedSets)):
-    print(mergedSets['date_Datetime'])
-    # +1 för att få så att green och svks timmar stämmer överense
-    #,df['V'][i]
-    #psqlString(df['valid_datetime'][i])
-    # DateTime uppdelad
-
-
-    #psqlString = "INSERT INTO greenlytics (date,time,T_height_,CLCT,Wind) values (%s, %s, %s, %s, %s) " % (str(dateAndTime[0]),str(dateAndTime[1]),df_green['T_height_59'][i],df_green['CLCT'][i],df_green['V_height_59'][i])
-
-    #psqlString = datetime.strptime((df_load['Datetime'][1]), "%Y-%m-%d %H:%M")
-    #print(psqlString)
-    # Använd något i denna stil
-    # --- psqlString = "INSERT INTO greenlytics (date,time,T_height_,CLCT,Wind) values (%s) " % (type(df_load['Datetime'][i]))
-
-    #ANVÄND
-    #psqlString = "INSERT INTO greenlytics (date,time,T_height_,CLCT,Wind) values (%s, %s, %s, %s) " % (str(dateAndTime[0]),str(dateAndTime[1]),df_load['Load'][i],df_load['Datetime'][i])
-    #psqlString = "INSERT INTO greenlytics (date,time,T_height_,CLCT,Wind) values (%s, %s, %s, %s, %s) " % (str(dateAndTime[0]),str(dateAndTime[1]),df_green['T_height_59'][i],df_green['CLCT'][i],df_green['V_height_59'][i])
-    #psqlString = "INSERT INTO greenlytics (datetime,T_height_,CLCT,Wind) values ( %s, %s, %s, %s) " % (df['valid_datetime'][i],df['T_height_59'][i],df['CLCT'][i],df['V_height_59'][i])
-    # --- print(psqlString)
+    endpoint_url = "http://localhost:5000/api/v1/weather-data"
+    headers = {"Content-Type" : "application/json"}
+    params = {
+    "timestamp": mergedSets["Datetime"][i],
+    "temperature": mergedSets["T_height_59"][i],
+    "cloud-cover": mergedSets["CLCT"][i],
+    "wind": mergedSets["T_height_59"][i],
+    "consumption": mergedSets["Load"][i],
+    "API-KEY": "MVK123"
+    }
+    response = requests.post(endpoint_url, headers=headers, data=json.dumps(params))
+    print(response.text)
