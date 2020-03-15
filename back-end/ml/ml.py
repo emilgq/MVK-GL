@@ -93,6 +93,7 @@ def createModel(configurations, modelID):
     model_rmse = evaluate_model(X_test, y_test, trained_model)
 
     #save_model(trained_model, modelID)
+    pickle.dump(trained_model, open('trained_models/' + modelID, 'wb'))
     print('XGBoost MAE = %0.4f' % model_rmse)
     return model_rmse
 
