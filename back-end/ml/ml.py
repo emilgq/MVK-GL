@@ -9,28 +9,32 @@ from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
 
 # Fetch the data, just placeholder data for the moment.
-# data_placeholder = 
+
 
 #data = pd.DataFrame(data)
-dataset = loadtxt('phTestData.csv', delimiter=",")
+#dataset = loadtxt('phTestData.csv', delimiter=",")
 
+data = [["Sat, 02 Feb 2999 11:00:00 GMT", 5, 11, 2, 280.0, 99.0, 14.0, 10.0], ["Sat, 02 Feb 2999 12:00:00 GMT", 5, 12, 2, 280.0, 99.0, 14.0, 10.0]]
+
+dataset = pd.DataFrame(data)
+print(dataset)
 # Seperate the target variable and the rest of the variables using .iloc to subset the data
-# X, y = dataset.iloc[:,:], dataset.iloc[:,:] 
-X = dataset[:,0]
-y = dataset[:,1]
+X = dataset.iloc[:,1:6]
+y = dataset.iloc[:,7]
 
+# Just to test the format
+print(X)
+print(y)
 # Because data is only one 1d array
-X = np.array(X).reshape(-1,1)
+#X = np.array(X).reshape(-1,1)
 
 configurations = {
     "model-type": 'xgboost',
-    "learning-rate": '0.6',
-    "max-depth": '11',
+    "learning-rate": 0.6,
+    "max-depth": 11,
     "model-type": 'XGBoost',
-    "train-split": '0.80',
-    "validation-split": 0.20
-
-    
+    "train-split": 0.80,
+    "validation-split": 0.20   
 }
 
 
@@ -92,7 +96,7 @@ def createModel(configurations, modelID):
     trained_model = fit_model(model, X_train, y_train)
     model_rmse = evaluate_model(X_test, y_test, trained_model)
 
-    #save_model(trained_model, modelID)
+    
     pickle.dump(trained_model, open('trained_models/' + modelID, 'wb'))
     print('XGBoost MAE = %0.4f' % model_rmse)
     return model_rmse
