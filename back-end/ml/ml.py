@@ -7,11 +7,20 @@ from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
+import urllib, json
+from urllib.request import urlopen
 
 # Fetch the data, just placeholder data for the moment.
 
 # Just some testdata
-data = [["Sat, 02 Feb 2999 11:00:00 GMT", 5, 11, 2, 280.0, 99.0, 14.0, 10.0], ["Sat, 02 Feb 2999 12:00:00 GMT", 5, 12, 2, 280.0, 99.0, 14.0, 10.0]]
+
+
+url = "http://35.228.239.24/api/v1/weather-data"
+
+json_url = urlopen(url)
+
+data = json.loads(json_url.read())
+
 
 dataset = pd.DataFrame(data)
 # Seperate the target variable and the rest of the variables using .iloc to subset the data
@@ -19,13 +28,13 @@ X = dataset.iloc[:,1:6]
 y = dataset.iloc[:,7]
 
 # Just to test the format
-print(X)
-print(y)
+#print(X)
+#print(y)
 
 configurations = {
     "learning-rate": 0.6,
-    "max-depth": 11,
-    "model-type": 'XGBoost',
+    "max-depth": None,
+    "model-type": 'LinearRegression',
     "train-split": 0.80,
     "validation-split": 0.20   
 }
@@ -96,11 +105,12 @@ def createModel(configurations, modelID):
     print(learningRate)
     
     pickle.dump(trained_model, open('trained_models/' + modelID, 'wb'))
-    #print('XGBoost MAE = %0.4f' % model_rmse)
+    print(configurations['model-type'] + ' RMSE = %0.4f' % model_rmse)
     return model_rmse
 
 
 # Only for testing
 if __name__== '__main__':
-    #createModel(configurations, "1")
-    predictModel([["Sat, 02 Feb 2999 11:00:00 GMT", 5, 11, 2, 280.0, 99.0, 14.0, 10.0], ["Sat, 02 Feb 2999 12:00:00 GMT", 5, 12, 2, 280.0, 99.0, 14.0, 10.0]], "1")
+    createModel(configurations, "2")
+    #predictModel([["Sat, 02 Feb 2999 11:00:00 GMT", 5, 11, 2, 280.0, 99.0, 14.0, 10.0], ["Sat, 02 Feb 2999 12:00:00 GMT", 5, 12, 2, 280.0, 99.0, 14.0, 10.0]], "1")
+    
