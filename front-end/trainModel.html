@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <title> GreenLytics Resources</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+  <!--//chart.js loaded.-->
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+
+<body onload="setup()">
+  <!-- <canvas id ="chart" width ="800" height="400"> </canvas> -->
+  <h1> Train a new model </h1>
+
+  <a href="http://127.0.0.1:8080/resourceManagement.html"><button style="border-radius:10px;">
+      Go back to Resource management
+    </button></a>
+
+    <hr />
+    <br> </br>
+
+<form action = "/action_page.php" method ="get">
+  <div class="namingModel">
+    <label for="namingModel"><b>1) Name your Model</b></label><br></br>
+    <input type="text" placeholder="Enter a model name" name="namingModel" required>
+  </div>
+
+  <br> </br>
+  <div class="container">
+    <label for="uname"><b>2) Business Data</b></label><br></br>  <!-- <input type="text" placeholder="Enter a model name" name="uname" required> -->
+  </div>
+    <!-- <form id='formid' action="form.php" method="POST" enctype="multipart/form-data"> -->
+               <input id='fileid' type='file' name='filename' visible/>
+
+  <br> </br>
+
+<label for="isak"><b>3) Weather Matrices</b></label><br></br>
+  <div class ="matrices">
+      <label for="Overcast"> Overcast </label>
+      <input type="checkbox" name="Overcast" id="Overcast">
+      <br> </br>
+      <label for="Temp"> Temp </label>
+      <input type="checkbox" name="Temp" id="Temp">
+      <br> </br>
+      <label for="Wind"> Wind </label>
+      <input type="checkbox" name="Wind" id="Wind">
+      <br> </br>
+      <label for="Precipitation"> Precipitation </label>
+      <input type="checkbox" name="Precipitation" id="Overcast">
+  </div>
+    <br> </br>
+
+
+  <label for="isak"><b>4) ML Algorithm</b></label><br></br>
+
+    <select id ="MLAlgorithms">
+       <option value="XGBoost">XGBoost</option>
+       <option value="Random Forest">Random Forest</option>
+       <option value="Linear Regression">Linear Regression</option>
+    </select>
+
+    <br> </br>
+
+    <label for="isak"><b>5) Hyperparameters</b></label><br></br>
+
+  <div class="slidecontainer">
+      <p>Learn rate:</p>
+    <input type="range" min="1" max="100" value="50" class="slider" id="learnRate" name ="slide1">
+    <p>Value: <span id="demo1"></span></p>
+    </div>
+
+    <div class="slidecontainer">
+      <p>Max Depth:</p>
+      <input type="range" min="1" max="100" value="50" class="slider" id="maxDepth">
+      <p>Value: <span id="demo2"></span></p>
+    </div>
+
+
+    <div class="slidecontainer">
+      <p>Data Set Split:</p>
+      <input type="range" min="1" max="100" value="50" class="slider" id="dataSetSplit">
+      <p>Value: <span id="demo3"></span></p>
+    </div>
+
+
+    <div class="slidecontainer">
+      <p>Validation Split:</p>
+      <input type="range" min="1" max="100" value="50" class="slider" id="myRange">
+      <p>Value: <span id="demo4"></span></p>
+    </div>
+
+      <br> </br>
+    <input type="submit" value="Submit">
+</form>
+  <script>
+    function setup() {
+      document.getElementById('buttonid').addEventListener('click', openDialog);
+
+      function openDialog() {
+        document.getElementById('fileid').click();
+      }
+      document.getElementById('fileid').addEventListener('change', submitForm);
+
+      function submitForm() {
+        document.getElementById('formid').submit();
+      }
+    }
+
+    var slider = document.getElementById("learnRate");
+    var slider2 = document.getElementById("maxDepth");
+    var slider3 = document.getElementById("dataSetSplit");
+    var slider4 = document.getElementById("myRange");
+    var output = document.getElementById("demo1");
+    var output2 = document.getElementById("demo2");
+    var output3 = document.getElementById("demo3");
+    var output4 = document.getElementById("demo4");
+
+    output.innerHTML = slider.value;
+    output2.innerHTML = slider2.value;
+    output3.innerHTML = slider3.value;
+    output4.innerHTML = slider4.value;
+
+slider.oninput = function() {
+  output.innerHTML = this.value;
+}
+slider2.oninput = function() {
+  output2.innerHTML = this.value;
+}
+slider3.oninput = function() {
+  output3.innerHTML = this.value;
+}
+slider4.oninput = function() {
+  output4.innerHTML = this.value;
+}
+  </script>
+</body>
+
+</html>
