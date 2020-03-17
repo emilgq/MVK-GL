@@ -1,0 +1,83 @@
+
+/* change color of header h1 */
+h1 {
+
+color: purple;
+
+}
+/* Colors of hovering links, clicking links & previously visited links. */
+a:hover{color:blue;}
+a:active {color:red;}
+a:visited {color:#989898;}
+
+/* Change Background color */
+body {
+  background:#5D8AA8;
+}
+
+/* screen resize margin auto */
+div#wrapper{
+  margin:auto;
+  background:white;
+  width:1000px;
+  height:400px;
+}
+
+header{
+  display:block;
+  padding: 100px 100px 70px 100px;
+}
+
+#websiteLogo{float:left;}
+
+#horzNav{
+  display:block;
+  padding: 10px 20px 10px 0px;
+  background: white;
+}
+
+#horzNav a{
+  text-decoration: none;
+  padding: 0px 0px 0px 20px;
+  color: red;
+}
+
+main {
+ padding: 10px 20px 20px 20px;
+}
+
+aside{background:#EFDECD;}
+
+#uoListTypes{
+  list-style-type: square;
+}
+
+#oListTypes{
+  list-style-type: upper-roman;
+}
+
+#oListIndent{
+  list-style-type: lower-roman;
+}
+
+#tableData{
+  width:600px;
+  border:3px solid black;
+}
+
+#tableData td, th{
+  border:1px solid black;
+}
+
+footer{
+  background:white;
+  color:black;
+  padding: 10px 10px 10px 10px;
+}
+
+.matrices{
+  display: flex;
+  justify-content: space-between;
+  width: 60%;
+  margin: .5rem;
+}
