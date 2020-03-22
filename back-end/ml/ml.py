@@ -15,30 +15,39 @@ from urllib.request import urlopen
 # Just some testdata
 
 
-url = "http://35.228.239.24/api/v1/weather-data"
+# url = "http://35.228.239.24/api/v1/weather-data"
 
-json_url = urlopen(url)
+# json_url = urlopen(url)
 
-data = json.loads(json_url.read())
+# data = json.loads(json_url.read())
 
 
-dataset = pd.DataFrame(data)
+# dataset = pd.DataFrame(data)
+# dataset = dataset.dropna()
 # Seperate the target variable and the rest of the variables using .iloc to subset the data
-X = dataset.iloc[:,1:6]
-y = dataset.iloc[:,7]
+# X = dataset.iloc[:,1:6]
+# y = dataset.iloc[:,7]
 
 # Just to test the format
 #print(X)
 #print(y)
 
 configurations = {
-    "learning-rate": 0.6,
-    "max-depth": None,
-    "model-type": 'LinearRegression',
+    "learning-rate": 0.1,
+    "max-depth": 6,
+    "model-type": 'XGBoost',
     "train-split": 0.80,
     "validation-split": 0.20   
 }
 
+
+def getData():
+    url = "http://35.228.239.24/api/v1/weather-data"
+    json_url = urlopen(url)
+    data = json.loads(json_url.read())
+    dataset = pd.DataFrame(data)
+    dataset = dataset.dropna()
+    return dataset
 
 print(configurations['model-type'])
 # Convert the dataset into an optimized data structure called Dmatrix
@@ -97,12 +106,17 @@ def createModel(configurations, modelID):
     if configurations['model-type'] == "RandomForest":
          model = RandomForestRegressor(max_depth=maxDepth)
 
+    # Get and format the data
+    dataset = getData()
+    X = dataset.iloc[:,1:6]
+    y = dataset.iloc[:,7]
+
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=configurations['validation-split'], random_state=123)
     trained_model = fit_model(model, X_train, y_train)
     model_rmse = evaluate_model(X_test, y_test, trained_model)
 
-    print(maxDepth)
-    print(learningRate)
+    #print(maxDepth)
+    #print(learningRate)
     
     pickle.dump(trained_model, open('trained_models/' + modelID, 'wb'))
     print(configurations['model-type'] + ' RMSE = %0.4f' % model_rmse)
@@ -111,6 +125,7 @@ def createModel(configurations, modelID):
 
 # Only for testing
 if __name__== '__main__':
+
     createModel(configurations, "2")
     #predictModel([["Sat, 02 Feb 2999 11:00:00 GMT", 5, 11, 2, 280.0, 99.0, 14.0, 10.0], ["Sat, 02 Feb 2999 12:00:00 GMT", 5, 12, 2, 280.0, 99.0, 14.0, 10.0]], "1")
     
