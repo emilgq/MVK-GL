@@ -7,6 +7,7 @@ from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
+from sklearn import svm
 import urllib, json
 from urllib.request import urlopen
 
@@ -35,7 +36,7 @@ from urllib.request import urlopen
 configurations = {
     "learning-rate": 0.1,
     "max-depth": 6,
-    "model-type": 'XGBoost',
+    "model-type": 'SVM',
     "train-split": 0.80,
     "validation-split": 0.20   
 }
@@ -63,8 +64,6 @@ print(configurations['model-type'])
 def fit_model(model, X_train, y_train):
     # Train model
     model.fit(X_train, y_train)
-
-    
     return model
 
 
@@ -105,6 +104,8 @@ def createModel(configurations, modelID):
          model = LinearRegression()
     if configurations['model-type'] == "RandomForest":
          model = RandomForestRegressor(max_depth=maxDepth)
+    if configurations['model-type'] == "SVM":
+        model = svm.SVR()
 
     # Get and format the data
     dataset = getData()
