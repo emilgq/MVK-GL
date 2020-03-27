@@ -12,21 +12,21 @@ endpoint_url = "https://api.greenlytics.io/weather/v1/get_nwp"
 headers = {"Authorization": "1iqsmV9rE6UhCkyzosBpROkGVgv0BrQ87aCPqLtV4VrBPwf0HbSESt8twLuDj3lrKUmj9sSe"}
 params = {
     'model': 'DWD_ICON-EU',
-    'start_date': '2019-05-15 00',
-    'end_date': '2019-05-16 00',
+    'start_date': '2019-12-20  00',
+    'end_date': '2020-03-01 00',
     'coords': {'latitude': [59], 'longitude': [18], 'height': [59]},
     'variables': ['T', 'CLCT','V'],
     'as_dataframe': True
 }
 # greenlytics
-responseGL = requests.get(endpoint_url, headers=headers, params={'query_params': json.dumps(params)})
-df_green = pd.read_json(responseGL.text)
+response = requests.get(endpoint_url, headers=headers, params={'query_params': json.dumps(params)})
+df_green = pd.read_json(response.text)
 
 
 # SVK API
 # Energy Load i MKWh for Stockholm area.
-date_start = '2019-05-15'
-date_end = '2019-05-16'
+date_start = '2019-08-16'
+date_end = '2020-03-01'
 area = 'STH'
 url_base = 'https://mimer.svk.se/'
 url_target = 'ConsumptionProfile/DownloadText?groupByType=0&' + \
@@ -42,7 +42,7 @@ df_load['Load'] = -df_load['Load']/10**3
 
 
 #print
-dategl = dateutil.parser.parse(df_green['valid_datetime'][1])
+#dategl = dateutil.parser.parse(df_green['valid_datetime'][1])
 #dateygl = datetime.strptime((df_green['valid_datetime'][1]), "%Y-%m-%d %H:%M")
 
 # Adds column with as a datetime object where timezone is removed. Makes it possible to compare dataframes
@@ -60,15 +60,16 @@ mergedSets = pd.merge(
     right_on=['date_valid_datetime']
 )
 
+mergedSets.dropna()
 # Posts the merged dataframe to rest-API
 for i in range(len(mergedSets)):
-    endpoint_url = "http://localhost:5000/api/v1/weather-data"
+    endpoint_url = "http://35.228.239.24/api/v1/weather-data"
     headers = {"Content-Type" : "application/json"}
     params = {
     "timestamp": mergedSets["Datetime"][i],
     "temperature": mergedSets["T_height_59"][i],
     "cloud-cover": mergedSets["CLCT"][i],
-    "wind": mergedSets["T_height_59"][i],
+    "wind": mergedSets["V_height_59"][i],
     "consumption": mergedSets["Load"][i],
     "API-KEY": "MVK123"
     }
