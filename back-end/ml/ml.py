@@ -36,6 +36,9 @@ from urllib.request import urlopen
 configurations = {
     "learning-rate": 0.1,
     "max-depth": 6,
+    "n-estimators": 100,
+    "kernel": 'poly',
+    "max-iter": None,
     "model-type": 'SVM',
     "train-split": 0.80,
     "validation-split": 0.20   
@@ -86,6 +89,8 @@ def predictModel(forecast, modelID):
 def createModel(configurations, modelID):
     default_maxdepth = 6
     default_learning_rate = 0.3
+    default_n_estimators = 100
+    default_max_iter = -1
     # Pretty ugly right now ¯\_(ツ)_/¯
     if configurations['max-depth'] != None:
          maxDepth =  configurations['max-depth']
@@ -98,14 +103,27 @@ def createModel(configurations, modelID):
         learningRate =  configurations['learning-rate']
     else:
          learningRate = default_learning_rate
+    if configurations['n-estimators'] != None:
+        nEstimators = configurations['n-estimators']
+    else:
+        nEstimators = default_n_estimators
+    if configurations['kernel'] != None:
+        svrKernel = configurations['kernel']
+    else:
+        svrKernel = "rbf"
+    if configurations['max-iter'] != None:
+        maxIter = configurations['max-iter']
+    else:
+        maxIter = default_max_iter 
+        
     if configurations['model-type'] == "XGBoost":
         model = xgb.XGBRegressor(learning_rate = learningRate, max_depth = maxDepth)
     if configurations['model-type'] == "LinearRegression":
          model = LinearRegression()
     if configurations['model-type'] == "RandomForest":
-         model = RandomForestRegressor(max_depth=maxDepth)
+         model = RandomForestRegressor(max_depth=maxDepth, n_estimators = nEstimators)
     if configurations['model-type'] == "SVM":
-        model = svm.SVR()
+        model = svm.SVR(kernel = svrKernel, max_iter = maxIter)
 
     # Get and format the data
     dataset = getData()
