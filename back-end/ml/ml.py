@@ -37,8 +37,8 @@ configurations = {
     "learning-rate": 0.1,
     "max-depth": 6,
     "n-estimators": 100,
-    "kernel": 'poly',
-    "max-iter": None,
+    "kernel": 'rbf',
+    "c": 10,
     "model-type": 'SVM',
     "train-split": 0.80,
     "validation-split": 0.20   
@@ -90,7 +90,7 @@ def createModel(configurations, modelID):
     default_maxdepth = 6
     default_learning_rate = 0.3
     default_n_estimators = 100
-    default_max_iter = -1
+    default_C = 1
     # Pretty ugly right now ¯\_(ツ)_/¯
     if configurations['max-depth'] != None:
          maxDepth =  configurations['max-depth']
@@ -111,11 +111,11 @@ def createModel(configurations, modelID):
         svrKernel = configurations['kernel']
     else:
         svrKernel = "rbf"
-    if configurations['max-iter'] != None:
-        maxIter = configurations['max-iter']
+    if configurations['c'] != None:
+        c = configurations['c']
     else:
-        maxIter = default_max_iter 
-        
+        c = default_C 
+
     if configurations['model-type'] == "XGBoost":
         model = xgb.XGBRegressor(learning_rate = learningRate, max_depth = maxDepth)
     if configurations['model-type'] == "LinearRegression":
@@ -123,7 +123,7 @@ def createModel(configurations, modelID):
     if configurations['model-type'] == "RandomForest":
          model = RandomForestRegressor(max_depth=maxDepth, n_estimators = nEstimators)
     if configurations['model-type'] == "SVM":
-        model = svm.SVR(kernel = svrKernel, max_iter = maxIter)
+        model = svm.SVR(kernel = svrKernel, C = c)
 
     # Get and format the data
     dataset = getData()
