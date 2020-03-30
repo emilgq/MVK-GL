@@ -1,6 +1,9 @@
-import random, re, datetime
+import random, re, datetime, time
 from flask import Flask, json, abort, request, Response
 import psycopg2
+
+# Importing celery to be able to run tasks in the backround
+from celery import Celery
 
 # To enable Cross Origin Requests (such as JS .fetch())
 from flask_cors import CORS
@@ -10,11 +13,21 @@ from config import config
 
 app = Flask(__name__)
 
+# Passing the application name and the connection URL for the message broker
+# The URL tells Celery where the broker service is running
+app.config['CELERY_BROKER_URL'] = 'redis://localhost:6379'
+# Getting and storing result from Task
+app.config['CELERY_RESULT_BACKEND'] = 'redis://localhost:6379'
+
+celery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])
+# Passing any additional configuration options for Celery from Flask
+celery.conf.update(app.config)
+
 # Enable JavaScript Fetch
 cors = CORS(app, resources={r"/api/v1/*": {"origins": "*"}})
 
 # Sample post request
-# curl http://localhost:5000/api/v1/project -d '{"model-name": "XXXXX", "model-type": "RandomForest", "learning-rate": 0.5, "max-depth":10, "train-split": 75, "validation-split": 25, "API-KEY": "MVK123"}' -X POST -v -H "Content-Type: application/json"
+# curl http://localhost:5000/api/v1/project -d '{"model-name": "XXXXX", "configurations": {"model-type": "RandomForest", "learning-rate": 0.5, "max-depth":10, "train-split": 75, "validation-split": 25}, "API-KEY": "MVK123"}' -X POST -v -H "Content-Type: application/json"
 # curl http://localhost:5000/api/v1/weather-forecast -d '{"timestamp":"2021-02-02 11:00", "wind": 0, "temperature": 0, "cloud-cover": 0, "API-KEY":"MVK123"}' -X POST -v -H "Content-Type: application/json"
 # curl http://localhost:5000/api/v1/weather-data -d '{"timestamp":"2999-02-02 11:00", "temperature":280, "cloud-cover":99, "wind":14, "consumption":10, "API-KEY":"MVK123"}' -X POST -v -H "Content-Type: application/json"
 
@@ -44,9 +57,9 @@ def runDBQuery(query, parameters):
     finally:
       conn.commit()
       cur.close()
-      if query_result is None: 
+      if query_result is None:
         return
-      else: 
+      else:
         return query_result, query_columns
 
   except (Exception, psycopg2.DatabaseError) as error:
@@ -54,6 +67,20 @@ def runDBQuery(query, parameters):
     if conn is not None:
       conn.close()
     raise Exception(error)
+
+# Background task
+@celery.task
+def background_task(model_id, configurations):
+  for i in range(10):
+    time.sleep(1)
+    print(i)
+  print('finished')
+  # rmse = createModel(configurations, model_id)
+  rmse = 20
+  updatequery = "update ml_models set status = 'True', rmse = (%s) where model_id = (%s)"
+  updateParameters = (rmse, model_id,)
+  runDBQuery(updatequery, updateParameters)
+  return
 
 # API Resource for fetching model specific results
 @app.route('/api/v1/project/<model_id>', methods=['GET', 'DELETE'])
@@ -74,7 +101,7 @@ def modelresult(model_id):
     # Add result column
     response['result'] = dict(zip(testTimes, testLoadPrediction))
     return json.dumps(response), 200
-  
+
   # Remove model
   if request.method == 'DELETE':
     args = request.get_json()
@@ -111,35 +138,29 @@ def project():
     args = request.get_json()
     if args['API-KEY'] != APIKEY:
       abort(Response('unauthorized',400))
-    if args['model-type'] not in ['XGBoost', 'RandomForest', 'LinearRegression']:
-      abort(Response('Model type \"{}\" is not provided in this application. Select \"XGBoost\", \"RandomForest\" or \"LinearRegression\"'.format(args['model-type']),400))
-    if ((args['learning-rate'] <= 0) or (args['learning-rate'] >= 1)):
-      abort(Response('Learning rate must be between 0 and 1',400))
-    if args['max-depth'] > 15:
-      abort(Response('Max depth is capped at 15',400))
-    if (args['train-split']+args['validation-split'] != 100):
+    configurations = args['configurations']
+    if configurations['model-type'] not in ['XGBoost', 'RandomForest', 'SVR', 'LinearRegression']:
+      abort(Response('Model type \"{}\" is not provided in this application. Select \"XGBoost\", \"RandomForest\", \"SVR\", or \"LinearRegression\"'.format(configurations['model-type']),400))
+    if (configurations['train-split']+configurations['validation-split'] != 100):
       abort(Response('Split must total to 100',400))
 
     # Run machine learning module
 
     # Fetch reference from database
     query = "insert into ml_models (model_name, configurations, owner) values (%s,%s,%s)"
-    configurations = {
-      "model-type": args['model-type'],
-      "learning-rate": args['learning-rate'],
-      "max-depth": args['max-depth'],
-      "train-split": args['train-split'],
-      "validation-split": args['validation-split'] 
-    }
     parameters = (args['model-name'], json.dumps(configurations), 1337,)
     # Embed in try/except
     try:
       runDBQuery(query, parameters)
+      model_id, _ = runDBQuery("select model_id from ml_models order by time_creation desc limit 1", None)
+      background_task(model_id[0], configurations)
       message = 'successful model creation'
       return message, 200
     except Exception as e:
       abort(Response('Invalid argument. Error: {}'.format(e), 400))
-    
+
+    # Kolla hur man returnerar model_id
+
 
 # API Resource for fetching the weather forecast and updating it with new data
 @app.route('/api/v1/weather-forecast', methods=['GET', 'POST'])
@@ -172,7 +193,7 @@ def weatherForecast():
       cc = float(args['cloud-cover'])
     except:
       abort(Response(json.dumps({"message": "Type Error of weather metrics or load"}), 400))
-    
+
     ts = datetime.datetime.strptime(args['timestamp'], '%Y-%m-%d %H:%M')
 
     # Extract datetime specifics
@@ -192,7 +213,7 @@ def weatherForecast():
     parameters = (ts, dow, hod, moy, temp, cc, wind,)
     try:
       runDBQuery(query, parameters)
-      return Response(json.dumps({"message": "Data point successfully added", "Data point": parameters}), 200)   
+      return Response(json.dumps({"message": "Data point successfully added", "Data point": parameters}), 200)
     except Exception as e:
       abort(Response('Error: {}'.format(e), 400))
 
@@ -225,7 +246,7 @@ def weatherData():
       load = float(args['consumption'])
     except:
       abort(Response(json.dumps({"message": "Type Error of weather metrics or load"}), 400))
-    
+
     # Convert string to datetime object
     ts = datetime.datetime.strptime(args['timestamp'], '%Y-%m-%d %H:%M')
 
@@ -235,11 +256,11 @@ def weatherData():
     moy = ts.month
     query = "insert into weather_data (ts, day, hour, month, temperature, cloud_cover, wind, consumption) values (%s,%s,%s,%s,%s,%s,%s,%s)"
     parameters = (ts, dow, hod, moy, temp, cc, wind, load,)
-    
+
     # Run insert query to weather_data
     try:
       runDBQuery(query, parameters)
-      return Response(json.dumps({"message": "Data point successfully added", "Data point": parameters}), 200)   
+      return Response(json.dumps({"message": "Data point successfully added", "Data point": parameters}), 200)
     except Exception as e:
       abort(Response('Error: {}'.format(e), 400))
 
