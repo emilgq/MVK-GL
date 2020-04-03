@@ -159,8 +159,6 @@ def project():
     except Exception as e:
       abort(Response('Invalid argument. Error: {}'.format(e), 400))
 
-    # Kolla hur man returnerar model_id
-
 
 # API Resource for fetching the weather forecast and updating it with new data
 @app.route('/api/v1/weather-forecast', methods=['GET', 'POST'])
