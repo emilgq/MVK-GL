@@ -153,7 +153,7 @@ def project():
     try:
       runDBQuery(query, parameters)
       model_id, _ = runDBQuery("select model_id from ml_models order by time_creation desc limit 1", None)
-      background_task(model_id[0], configurations)
+      background_task.delay(model_id[0][0], configurations)
       message = 'successful model creation'
       return message, 200
     except Exception as e:
