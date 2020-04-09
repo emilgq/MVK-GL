@@ -3,8 +3,23 @@ import requests
 import re
 import pandas as pd
 import json
-from datetime import datetime
+from datetime import (datetime, date, timedelta)
 import dateutil.parser
+
+# Used to get the past 24h data
+# Get Yesterdays date
+yesterday_Date = date.today() - timedelta(days=1)
+
+# Need to get the date from to days ago. GL API loads data from hour 00 and SVK from 01
+# Loads SVK from the day before to get matching datetime with GL
+load_Start_Date = date.today() - timedelta(days=2)
+today_Date = date.today()
+# Yesterdays date string to send in API
+load_Start_Str = load_Start_Date.strftime("%Y-%m-%d")
+yesterday_Str = yesterday_Date.strftime("%Y-%m-%d")
+today_Str = today_Date.strftime("%Y-%m-%d")
+
+
 
 # Greenlytics API
 # Weather for Stockholm coordinates. Returns Temperature, cloudcoverage and wind.
@@ -12,8 +27,9 @@ endpoint_url = "https://api.greenlytics.io/weather/v1/get_nwp"
 headers = {"Authorization": "1iqsmV9rE6UhCkyzosBpROkGVgv0BrQ87aCPqLtV4VrBPwf0HbSESt8twLuDj3lrKUmj9sSe"}
 params = {
     'model': 'DWD_ICON-EU',
-    'start_date': '2019-08-16  00',
-    'end_date': '2019-08-17 00',
+    'start_date': yesterday_Str + ' 00',
+    'end_date': today_Str  + ' 03',
+    'freqs': '24h',
     'coords': {'latitude': [59], 'longitude': [18], 'height': [59]},
     'variables': ['T', 'CLCT','V'],
     'as_dataframe': True
@@ -25,8 +41,8 @@ df_green = pd.read_json(response.text)
 
 # SVK API
 # Energy Load i MKWh for Stockholm area.
-date_start = '2019-08-16'
-date_end = '2019-08-17'
+date_start = load_Start_Str
+date_end = today_Str
 area = 'STH'
 url_base = 'https://mimer.svk.se/'
 url_target = 'ConsumptionProfile/DownloadText?groupByType=0&' + \
@@ -68,17 +84,17 @@ mergedSets = pd.merge(
 mergedSets.dropna()
 print(mergedSets)
 # Posts the merged dataframe to rest-API
-#
-#for i in range(len(mergedSets)):
-#    endpoint_url = "http://35.228.239.24/api/v1/weather-data"
-#    headers = {"Content-Type" : "application/json"}
-#    params = {
-#    "timestamp": mergedSets["Datetime"][i],
-#    "temperature": mergedSets["T_height_59"][i],
-#    "cloud-cover": mergedSets["CLCT"][i],
-#    "wind": mergedSets["V_height_59"][i],
-#    "consumption": mergedSets["Load"][i],
-#    "API-KEY": "MVK123"
-#    }
-#    response = requests.post(endpoint_url, headers=headers, data=json.dumps(params))
-#    print(response.text)
+
+for i in range(len(mergedSets)):
+    endpoint_url = "http://35.228.239.24/api/v1/weather-data"
+    headers = {"Content-Type" : "application/json"}
+    params = {
+    "timestamp": mergedSets["Datetime"][i],
+    "temperature": mergedSets["T_height_59"][i],
+    "cloud-cover": mergedSets["CLCT"][i],
+    "wind": mergedSets["V_height_59"][i],
+    "consumption": mergedSets["Load"][i],
+    "API-KEY": "MVK123"
+    }
+    response = requests.post(endpoint_url, headers=headers, data=json.dumps(params))
+    print(response.text)
