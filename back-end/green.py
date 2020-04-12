@@ -6,28 +6,50 @@ import json
 from datetime import (datetime, date, timedelta)
 import dateutil.parser
 
-# Used to get the past 24h data
-# Get Yesterdays date
-yesterday_Date = date.today() - timedelta(days=1)
+# Loads the data from yesterday at 01 hour to today at 01
+# Use as Croonjob after 01
+api_url = "http://35.228.239.24/api/v1/"
+endpoint = "weather-data"
+endpoint_url = api_url + endpoint
+
+response = requests.get(endpoint_url)
+
+df_weather = pd.read_json(response.text)
+
+latest_retrievial_date = datetime.strptime("1901 01 01","%Y %m %d")
+# Column 0 holds date len(df_weather)
+# Gets the date from the newest data
+for i in range(len(df_weather)):
+    print(df_weather[0][i])
+    date_list_str = re.search("([0-9]{2}\s[A-Z][a-z]{2}\s20[\d]{2})",df_weather[0][i])
+    current_date = datetime.strptime(date_list_str[0],"%d %b %Y")
+    print(current_date)
+    if(current_date > latest_retrievial_date):
+        latest_retrievial_date = current_date
+print(latest_retrievial_date)
+
+
+
+# Used to get the data starting from the latestretrived data
 
 # Need to get the date from to days ago. GL API loads data from hour 00 and SVK from 01
 # Loads SVK from the day before to get matching datetime with GL
-load_Start_Date = date.today() - timedelta(days=2)
+load_Start_Date = latest_retrievial_date - timedelta(days=1)
 today_Date = date.today()
 # Yesterdays date string to send in API
 load_Start_Str = load_Start_Date.strftime("%Y-%m-%d")
-yesterday_Str = yesterday_Date.strftime("%Y-%m-%d")
+latest_date_Str = latest_retrievial_date.strftime("%Y-%m-%d")
 today_Str = today_Date.strftime("%Y-%m-%d")
 
 
 
 # Greenlytics API
 # Weather for Stockholm coordinates. Returns Temperature, cloudcoverage and wind.
-endpoint_url = "https://api.greenlytics.io/weather/v1/get_nwp"
+endpoint_url_GL = "https://api.greenlytics.io/weather/v1/get_nwp"
 headers = {"Authorization": "1iqsmV9rE6UhCkyzosBpROkGVgv0BrQ87aCPqLtV4VrBPwf0HbSESt8twLuDj3lrKUmj9sSe"}
 params = {
     'model': 'DWD_ICON-EU',
-    'start_date': yesterday_Str + ' 00',
+    'start_date': latest_date_Str + ' 00',
     'end_date': today_Str  + ' 03',
     'freqs': '24h',
     'coords': {'latitude': [59], 'longitude': [18], 'height': [59]},
@@ -35,7 +57,7 @@ params = {
     'as_dataframe': True
 }
 # greenlytics
-response = requests.get(endpoint_url, headers=headers, params={'query_params': json.dumps(params)})
+response = requests.get(endpoint_url_GL, headers=headers, params={'query_params': json.dumps(params)})
 df_green = pd.read_json(response.text)
 
 
@@ -82,9 +104,7 @@ mergedSets = pd.merge(
 )
 
 mergedSets.dropna()
-print(mergedSets)
 # Posts the merged dataframe to rest-API
-
 for i in range(len(mergedSets)):
     endpoint_url = "http://35.228.239.24/api/v1/weather-data"
     headers = {"Content-Type" : "application/json"}
