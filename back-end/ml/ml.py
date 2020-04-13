@@ -40,7 +40,7 @@ print(configurations['model-type'])
 def fit_model(model,default_model, X_train, y_train):
     try:
         return model.fit(X_train, y_train)
-    except (ValueError, XGBoost.core.XGBoostError):
+    except (ValueError, xgb.core.XGBoostError):
         return default_model.fit(X_train, y_train)
     
 # Compute the rmse by invoking the mean_squared_error function from sklearn's metrics module.
