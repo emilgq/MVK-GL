@@ -1,4 +1,4 @@
-import random, re, datetime, time
+import random, re, datetime, time, sys
 from flask import Flask, json, abort, request, Response
 import psycopg2
 
@@ -10,6 +10,10 @@ from flask_cors import CORS
 
 # Import database conf and parser
 from config import config
+
+# Import home made Machine Learning module
+sys.path.append('../ml/')
+from ml import createModel, predictModel
 
 app = Flask(__name__)
 
@@ -68,19 +72,23 @@ def runDBQuery(query, parameters):
       conn.close()
     raise Exception(error)
 
-# Background task
+# Create model in background process
 @celery.task
-def background_task(model_id, configurations):
-  for i in range(10):
-    time.sleep(1)
-    print(i)
-  print('finished')
-  # rmse = createModel(configurations, model_id)
-  rmse = 20
+def create_new_model(model_id, configurations):
+  print('Creating new model with conf: ' + str(configurations))
+  rmse = createModel(configurations, model_id)
   updatequery = "update ml_models set status = 'True', rmse = (%s) where model_id = (%s)"
   updateParameters = (rmse, model_id,)
   runDBQuery(updatequery, updateParameters)
-  return
+  return True
+
+# Create model in background process
+@celery.task
+def predict_model(model_id):
+  print('Predicting load for model with id: ' + model_id)
+  load = predictModel(model_id)
+  return load
+
 
 # API Resource for fetching model specific results
 @app.route('/api/v1/project/<model_id>', methods=['GET', 'DELETE'])
@@ -99,7 +107,7 @@ def modelresult(model_id):
     # Pass weather forecast through trained model (.score())
     response = dict(zip(cols, result[0]))
     # Add result column
-    response['result'] = dict(zip(testTimes, testLoadPrediction))
+    response['result'] = str(predict_model(model_id))
     return json.dumps(response), 200
 
   # Remove model
@@ -141,10 +149,8 @@ def project():
     configurations = args['configurations']
     if configurations['model-type'] not in ['XGBoost', 'RandomForest', 'SVR', 'LinearRegression']:
       abort(Response('Model type \"{}\" is not provided in this application. Select \"XGBoost\", \"RandomForest\", \"SVR\", or \"LinearRegression\"'.format(configurations['model-type']),400))
-    if (configurations['train-split']+configurations['validation-split'] != 100):
-      abort(Response('Split must total to 100',400))
-
-    # Run machine learning module
+    if (configurations['train-split']+configurations['validation-split'] != 1):
+      abort(Response('Split must total to 1',400))
 
     # Fetch reference from database
     query = "insert into ml_models (model_name, configurations, owner) values (%s,%s,%s)"
@@ -153,7 +159,7 @@ def project():
     try:
       runDBQuery(query, parameters)
       model_id, _ = runDBQuery("select model_id from ml_models order by time_creation desc limit 1", None)
-      background_task.delay(model_id[0][0], configurations)
+      create_new_model.delay(model_id[0][0], configurations)
       message = 'successful model creation'
       return message, 200
     except Exception as e:
