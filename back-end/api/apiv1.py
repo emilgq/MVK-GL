@@ -38,6 +38,7 @@ cors = CORS(app, resources={r"/api/v1/*": {"origins": "*"}})
 APIKEY = "MVK123"
 testLoadPrediction = [-300000,-290000,-280000,-270000,-290000,-310000,-300000,-310000,-320000,-330000,-340000,-310000,-320000,-290000,-280000,-300000,-310000,-330000,-300000,-280000,-290000,-280000,-270000,-320000]
 testTimes = ['00:00','01:00','02:00','03:00','04:00','05:00','06:00','07:00','08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00', '20:00', '21:00', '22:00', '23:00']
+testLoadBenchmark = [-500,-100,-900,-270,-400,-310,-300,-310,-320,-330,-340,-310,-320,-290,-280,-300,-310,-330,-300,-280,-290,-280,-270,-320]
 
 # Query must be a parametrized SQL Statement - (select * from ml_models where model_name = %s)
 # Paramteres must be a tuple with number of element equal to number of parameters in query. (XGB001)
@@ -80,6 +81,7 @@ def background_task(model_id, configurations):
   updatequery = "update ml_models set status = 'True', rmse = (%s) where model_id = (%s)"
   updateParameters = (rmse, model_id,)
   runDBQuery(updatequery, updateParameters)
+  print('updated')
   return
 
 # API Resource for fetching model specific results
@@ -262,7 +264,19 @@ def weatherData():
     except Exception as e:
       abort(Response('Error: {}'.format(e), 400))
 
+# API resource for fetching the predicted load for the the upcoming 24h
+@app.route('api/v1/benchmark', methods=['GET'])
+  def benchmark():
+    if request.method == 'GET'
 
+      response['result'] = dict(zip(testTimes, testLoadBenchmark))
+      response['model-name'] = 'Benchmark'
+      response['model-type'] = 'LinearRegression'
+
+      return json.dumps(response), 200
+
+    except Exception as e:
+      abort(Response('Error: {}'.format(e), 400)))
 
 if __name__ == "__main__":
     app.run(debug=True)
