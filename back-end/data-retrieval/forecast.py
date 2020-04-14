@@ -15,7 +15,7 @@ yesterday_Str = yesterday_Date.strftime("%Y-%m-%d") + "  18"
 # Greenlytics API 2
 # Weather forecast. Returns Temperature, cloudcoverage and wind.
 endpoint_url = "https://api.greenlytics.io/weather/v1/get_nwp"
-headers = {"Authorization": "1iqsmV9rE6UhCkyzosBpROkGVgv0BrQ87aCPqLtV4VrBPwf0HbSESt8twLuDj3lrKUmj9sSe"}
+headers = {"Authorization": ""}
 params = {
     'model': 'NCEP_GFS',
     'start_date': yesterday_Str,
