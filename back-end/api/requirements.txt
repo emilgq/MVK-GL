@@ -5,3 +5,7 @@ flask_restful==0.3.8
 flask_cors==3.0.8
 psycopg2==2.8.4
 simplejson==3.17.0
+xgboost==1.0.2
+sklearn==0.0
+pandas==1.0.3
+numpy==1.18.2
