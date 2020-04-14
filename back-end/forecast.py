@@ -6,6 +6,7 @@ import pandas as pd
 import json
 from datetime import (datetime, date, timedelta)
 import dateutil.parser
+from config import config
 
 
 today_date = datetime.today()
@@ -35,7 +36,7 @@ print(diff_hours)
 # Greenlytics API
 # Weather forecast. Returns Temperature, cloudcoverage and wind.
 endpoint_url = "https://api.greenlytics.io/weather/v1/get_nwp"
-headers = {"Authorization": "1iqsmV9rE6UhCkyzosBpROkGVgv0BrQ87aCPqLtV4VrBPwf0HbSESt8twLuDj3lrKUmj9sSe"}
+headers = {"Authorization": config()}
 params = {
     'model': 'NCEP_GFS',
     'start_date': start_str ,
