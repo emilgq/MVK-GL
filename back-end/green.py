@@ -6,31 +6,30 @@ import json
 from datetime import (datetime, date, timedelta)
 import dateutil.parser
 
-# Loads the data from yesterday at 01 hour to today at 01
-# Use as Croonjob after 01
+# Loads the data from latest_retrievial_date at 00 hour to yesterday at 23
+# Use as Croonjob after 01:00
+# Eric Fredin Haslum
+
+# Gets the date of the newest data inserted in the weather-data database
 api_url = "http://35.228.239.24/api/v1/"
 endpoint = "weather-data"
 endpoint_url = api_url + endpoint
 
 response = requests.get(endpoint_url)
-
 df_weather = pd.read_json(response.text)
 
 latest_retrievial_date = datetime.strptime("1901 01 01","%Y %m %d")
-# Column 0 holds date len(df_weather)
+# Column 0 holds date in df_weather
 # Gets the date from the newest data
 for i in range(len(df_weather)):
-    print(df_weather[0][i])
+    # Finds day, month (as Aug/Sep etc.) and year
     date_list_str = re.search("([0-9]{2}\s[A-Z][a-z]{2}\s20[\d]{2})",df_weather[0][i])
     current_date = datetime.strptime(date_list_str[0],"%d %b %Y")
-    print(current_date)
+    # Checks which date is the latest
     if(current_date > latest_retrievial_date):
         latest_retrievial_date = current_date
-print(latest_retrievial_date)
 
 
-
-# Used to get the data starting from the latestretrived data
 
 # Need to get the date from to days ago. GL API loads data from hour 00 and SVK from 01
 # Loads SVK from the day before to get matching datetime with GL
@@ -44,9 +43,9 @@ today_Str = today_Date.strftime("%Y-%m-%d")
 
 
 # Greenlytics API
-# Weather for Stockholm coordinates. Returns Temperature, cloudcoverage and wind.
+# Weather for Stockholm coordinates. Returns Temperature, cloudcoverage and wind as pandas dataframe
 endpoint_url_GL = "https://api.greenlytics.io/weather/v1/get_nwp"
-headers = {"Authorization": "1iqsmV9rE6UhCkyzosBpROkGVgv0BrQ87aCPqLtV4VrBPwf0HbSESt8twLuDj3lrKUmj9sSe"}
+headers = {"Authorization": ""}
 params = {
     'model': 'DWD_ICON-EU',
     'start_date': latest_date_Str + ' 00',
@@ -56,7 +55,6 @@ params = {
     'variables': ['T', 'CLCT','V'],
     'as_dataframe': True
 }
-# greenlytics
 response = requests.get(endpoint_url_GL, headers=headers, params={'query_params': json.dumps(params)})
 df_green = pd.read_json(response.text)
 
@@ -79,16 +77,13 @@ df_load['Load'] = -df_load['Load']/10**3
 
 
 
-#print
-#dategl = dateutil.parser.parse(df_green['valid_datetime'][1])
-#dateygl = datetime.strptime((df_green['valid_datetime'][1]), "%Y-%m-%d %H:%M")
 
-#Drop duplicates with same date in df_green
+# Makes datetime object of date in a new column, timezone removed.
+# Used when merging GL dataframe and Load dataframe
+df_green.loc[:,'date_valid_datetime'] = [(dateutil.parser.parse(row)).replace(tzinfo=None) for row in df_green['valid_datetime']]
+
+#Drop duplicates with same date in df_green and makes it a view
 df_green_unique = df_green.drop_duplicates(["valid_datetime"])
-
-
-# Adds column with as a datetime object where timezone is removed. Makes it possible to compare dataframes
-df_green_unique['date_valid_datetime'] = [(dateutil.parser.parse(row)).replace(tzinfo=None) for row in df_green_unique['valid_datetime']]
 
 
 # Adds column with date as a datetime object. Makes it possible to compare dataframes
