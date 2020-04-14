@@ -1,25 +1,46 @@
 
 import requests
 import re
+import math
 import pandas as pd
 import json
 from datetime import (datetime, date, timedelta)
 import dateutil.parser
 
 
-# The date of two days ago. By calling the forecast from two days ago it's sure that is a forecas.
-yesterday_Date = date.today() - timedelta(days=2)
-# Yesterdays date string to send in API
-yesterday_Str = yesterday_Date.strftime("%Y-%m-%d") + "  18"
+today_date = datetime.today()
 
-# Greenlytics API 2
+
+# The date of 1 days ago. By calling the forecast from two days ago it's sure that is a forecas.
+yesterday_Date = date.today() - timedelta(days=1)
+# Yesterdays date string to send in API
+
+yesterday_Str = yesterday_Date.strftime("%Y-%m-%d")
+
+# string of start date of dataretriveal at hour 18
+start_str = yesterday_Str + '  18'
+# Makes Array with year , month , day
+date_list = (yesterday_Str.split('-'))
+#creates a datetime object that corresponds to the last retrieval,
+# used to calculate the difference in hours between current hour and last retrieval
+retrive_date_hour = datetime(int(date_list[0]),int(date_list[1]),int(date_list[2]),18)
+
+# difference in seconds since last retrieval
+diff_dates = today_date-retrive_date_hour
+# calculate the difference in hours to know what index to start from, rounded down
+# Divide by 3600 seconds to get hours
+diff_hours = math.floor(diff_dates.total_seconds()/3600)
+print(diff_hours)
+
+# Greenlytics API
 # Weather forecast. Returns Temperature, cloudcoverage and wind.
 endpoint_url = "https://api.greenlytics.io/weather/v1/get_nwp"
 headers = {"Authorization": "1iqsmV9rE6UhCkyzosBpROkGVgv0BrQ87aCPqLtV4VrBPwf0HbSESt8twLuDj3lrKUmj9sSe"}
 params = {
     'model': 'NCEP_GFS',
-    'start_date': yesterday_Str,
-    'end_date': yesterday_Str,
+    'start_date': start_str ,
+    'end_date': start_str ,
+    'freqs': '6h',
     'coords': {'latitude': [59], 'longitude': [18], 'lv_HTGL2': [59.0], 'lv_ISBL7': [100000.0]},
     'variables': ['Temperature_Height', 'CloudCover_Isobar', 'WindGust'],
     'as_dataframe': True
@@ -35,7 +56,7 @@ df_forecast['date_valid_datetime'] = [(dateutil.parser.parse(row)).replace(tzinf
 # Send data to forecast endpoint
 # Casts cloudcover from num int64 to int so it's serializable in JSON
 # 30 and 54 is the corrcet hours for todays index.
-for i in range(30,54):
+for i in range(diff_hours,(diff_hours+24)):
     # String of the timestamp with correct formation for the API
     date_Str = df_forecast['date_valid_datetime'][i].strftime("%Y-%m-%d %H:%M")
     endpoint_url = "http://35.228.239.24/api/v1/weather-forecast"
