@@ -46,7 +46,7 @@ today_Str = today_Date.strftime("%Y-%m-%d")
 # Greenlytics API
 # Weather for Stockholm coordinates. Returns Temperature, cloudcoverage and wind.
 endpoint_url_GL = "https://api.greenlytics.io/weather/v1/get_nwp"
-headers = {"Authorization": "1iqsmV9rE6UhCkyzosBpROkGVgv0BrQ87aCPqLtV4VrBPwf0HbSESt8twLuDj3lrKUmj9sSe"}
+headers = {"Authorization": ""}
 params = {
     'model': 'DWD_ICON-EU',
     'start_date': latest_date_Str + ' 00',
