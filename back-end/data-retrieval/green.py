@@ -5,6 +5,7 @@ import pandas as pd
 import json
 from datetime import (datetime, date, timedelta)
 import dateutil.parser
+from config import config
 
 # Loads the data from latest_retrievial_date at 00 hour to yesterday at 23
 # Use as Croonjob after 01:00
@@ -45,7 +46,7 @@ today_Str = today_Date.strftime("%Y-%m-%d")
 # Greenlytics API
 # Weather for Stockholm coordinates. Returns Temperature, cloudcoverage and wind as pandas dataframe
 endpoint_url_GL = "https://api.greenlytics.io/weather/v1/get_nwp"
-headers = {"Authorization": ""}
+headers = {"Authorization": config()}
 params = {
     'model': 'DWD_ICON-EU',
     'start_date': latest_date_Str + ' 00',
