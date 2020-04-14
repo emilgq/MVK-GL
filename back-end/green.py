@@ -60,7 +60,7 @@ df_green = pd.read_json(response.text)
 
 
 # SVK API
-# Energy Load i MKWh for Stockholm area.
+# Energy Load i MWh for Stockholm area.
 date_start = load_Start_Str
 date_end = today_Str
 area = 'STH'

@@ -40,18 +40,12 @@ df_load.index = pd.to_datetime(df_load['Datetime'])
 df_load['Load'] = -df_load['Load']/10**3
 
 
+# Makes datetime object of date in a new column, timezone removed.
+# Used when merging GL dataframe and Load dataframe
+df_green.loc[:,'date_valid_datetime'] = [(dateutil.parser.parse(row)).replace(tzinfo=None) for row in df_green['valid_datetime']]
 
-#print
-#dategl = dateutil.parser.parse(df_green['valid_datetime'][1])
-#dateygl = datetime.strptime((df_green['valid_datetime'][1]), "%Y-%m-%d %H:%M")
-
-#Drop duplicates with same date in df_green
+#Drop duplicates with same date in df_green and makes it a view
 df_green_unique = df_green.drop_duplicates(["valid_datetime"])
-
-
-# Adds column with as a datetime object where timezone is removed. Makes it possible to compare dataframes
-df_green_unique['date_valid_datetime'] = [(dateutil.parser.parse(row)).replace(tzinfo=None) for row in df_green_unique['valid_datetime']]
-
 
 # Adds column with date as a datetime object. Makes it possible to compare dataframes
 df_load['date_Datetime'] = [(dateutil.parser.parse(rows)) for rows in df_load['Datetime']]
@@ -66,9 +60,8 @@ mergedSets = pd.merge(
 )
 
 mergedSets.dropna()
-print(mergedSets)
-# Posts the merged dataframe to rest-API
 
+# Posts the merged dataframe to rest-API
 for i in range(len(mergedSets)):
     endpoint_url = "http://35.228.239.24/api/v1/weather-data"
     headers = {"Content-Type" : "application/json"}
