@@ -11,16 +11,6 @@ from sklearn import svm
 import urllib, json
 from urllib.request import urlopen
 
-configurations = {
-    "learning-rate": 0.1,
-    "max-depth": 10,
-    "n-estimators": 100,
-    "kernel": 'poly',
-    "c": 10,
-    "model-type": 'XGBoost',
-    "train-split": 0.80,
-    "validation-split": 0.20   
-}
 
 
 def getData(type):
@@ -31,11 +21,9 @@ def getData(type):
         dataset = pd.DataFrame(data)
         dataset = dataset.dropna()
         return dataset
-    except:
+    except Exception as e:
         # Something else here.
-        print("Some URL error")
-
-print(configurations['model-type'])
+        print(e)
 
 def fit_model(model,default_model, X_train, y_train):
     try:
@@ -49,11 +37,11 @@ def evaluate_model(X_test, y_true, model):
     return np.sqrt(mean_squared_error(y_true, y_pred))
 
 
-def predictModel(forecast, modelID):
-    loaded_model = pickle.load(open('trained_models/' + modelID, 'rb'))
+def predictModel(modelID):
+    loaded_model = pickle.load(open('/home/emil/KTH/year2/MVK/MVK-GL/back-end/ml/trained_models/' + str(modelID), 'rb'))
     dataset = getData('forecast')
     X = dataset.iloc[:,1:6]
-    return loaded_model.predict(X)
+    return list(loaded_model.predict(X))
 
 def createModel(configurations, modelID):
     if configurations['model-type'] == "XGBoost":
@@ -80,7 +68,7 @@ def createModel(configurations, modelID):
     
     # Save model to local file
     try:
-        pickle.dump(trained_model, open('trained_models/' + modelID, 'wb'))
+        pickle.dump(trained_model, open('/home/emil/KTH/year2/MVK/MVK-GL/back-end/ml/trained_models/' + str(modelID), 'wb'))
     except FileNotFoundError as error:
         raise FileNotFoundError(error)
         
