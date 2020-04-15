@@ -29,22 +29,24 @@
            <!-- XBG VALUES -->
                             <div id = "XGB" class="form-group" style = "display:none;">
                                 <label for="learningrate">Learning Rate:</label><br>
-                                <input type="range" min="0" max="10" value="0" class="slider" id="myRange">
-                                <p>Value: <span id="demo"></span></p>
+                                <input type="range" min="0" max="10" value="0" class="slider" id="XGBlr">
+                                <p>Value: <span id="oXGBlr"></span></p>
                                 <!-- <div class="form-group">
                                     <label for="learningrate" class="text-info">Learning Rate:</label><br>
                                     <input type="range" min="0" max="10" value="5" class="slider" id="myRange">
                                     <p>Value: <span id="demo"></span></p>
                                 </div> -->
                                 <label for="maxdepth" class="form-group">Max Depth: <br>Insert any number larger than 0</label><br>
-                                <input type="number" min="0"  value="0" class="slider" id="myRange2">
-                                <p>Your selected max depth is: <span id="demo2"></span></p>
+                                <input type="number" min="1"  value="1" class="slider" id="XGBmd">
+                                <p>Your selected max depth: <span id="oXGBmd"></span></p>
+
                             </div>
 
                             <!-- LR VALUES -->
                             <div id = "LR" class ="form-group" style = "display:none;">
-                                <label for="learningrate">Learning Rate:</label><br>
-                                <input type="range" min="0" max="10" value="0" class="slider" id="myRange5">
+                                <p> Linear Regression has no configurable options</p>
+                                <!-- <label for="learningrate">Learning Rate:</label><br> -->
+                                <!-- <input type="range" min="0" max="10" value="0" class="slider" id="myRange5">
                                 <p>Value: <span id="demo5"></span></p>
                                 <label for="maxdepth" class="form-group">Max Depth:</label><br>
                                 <input type="range" min="0" max="25" value="0" class="slider" id="myRange6">
@@ -54,22 +56,18 @@
                                 <p>Value: <span id="demo3"></span></p>
                                 <label for="valsplit" class="form-group">Validation Split:</label><br>
                                 <input type="hidden" min="0" max="100" value="0" class="slider" id="myRange4">
-                                <p> <span id="demo4"></span></p>
+                                <p> <span id="demo4"></span></p> -->
                             </div>
 
                             <div id = "RF" class ="form-group" style = "display:none;">
-                                <label for="learningrate">Learning Rate:</label><br>
-                                <input type="range" min="0" max="10" value="0" class="slider" id="myRange5">
-                                <p>Value: <span id="demo5"></span></p>
-                                <label for="maxdepth" class="form-group">Max Depth:</label><br>
-                                <input type="range" min="0" max="25" value="0" class="slider" id="myRange6">
-                                <p>Value: <span id="demo6"></span></p>
-                                <label for="trainsplit" class="form-group">Train Split:</label><br>
-                                <input type="range" min="0" max="100" value="0" class="slider" id="myRange3">
-                                <p>Value: <span id="demo3"></span></p>
-                                <label for="valsplit" class="form-group">Validation Split:</label><br>
-                                <input type="hidden" min="0" max="100" value="0" class="slider" id="myRange4">
-                                <p> <span id="demo4"></span></p>
+                                <label for="nestimators">n Estimators: <br> The number of trees in the forest.<br>Value must be larger than 0</label><br>
+                                <input type="number" min="1"  value="1" class="slider" id="RFne"><br>
+                                <p>Your selected amount of trees: <span id="oRFne"></span></p>
+                                <br>
+
+                                <label for="maxdepth" class="form-group">Max Depth: <br>Insert any number larger than 0</label><br>
+                                <input type="number" min="1"  value="1" class="slider" id="RFmd">
+                                <p>Your selected max depth: <span id="oRFmd"></span></p>
                             </div>
 
                             </div>
@@ -111,39 +109,36 @@
     </div>
     <!-- Display slider values -->
     <script>
-        var slider = document.getElementById("myRange");
-        var slider2 = document.getElementById("myRange2");
-        var slider3 = document.getElementById("myRange3");
-        var slider4 = document.getElementById("myRange4");
-        var slider5 = document.getElementById("myRange5");
-        var slider6 = document.getElementById("myRange6");
-        var output = document.getElementById("demo");
-        var output2 = document.getElementById("demo2");
-        var output3 = document.getElementById("demo3");
-        var output4 = document.getElementById("demo4");
-        var output5 = document.getElementById("demo5");
-        var output6 = document.getElementById("demo6");
-        output.innerHTML = slider.value;
-        output2.innerHTML = slider2.value;
-        output3.innerHTML = slider3.value;
-        output4.innerHTML = slider4.value;
-        output5.innerHTML = slider5.value;
-        output6.innerHTML = slider6.value;
-        slider.oninput = function() {
-          output.innerHTML = this.value/10;
+        var XGBlearningrate = document.getElementById("XGBlr");
+        var XGBmaxdepth = document.getElementById("XGBmd");
+        // var slider5 = document.getElementById("myRange5");
+        var RandomForestnestimators = document.getElementById("RFne");
+        var RandomForestmaxdepth = document.getElementById("RFmd");
+        var outputXGBlr = document.getElementById("oXGBlr");
+        var outputXGBmd = document.getElementById("oXGBmd");
+        var outputRFne = document.getElementById("oRFne");
+        var outputRFmd = document.getElementById("oRFmd")
+        
+        // var output4 = document.getElementById("demo4");
+        // var output5 = document.getElementById("demo5");
+        // var output6 = document.getElementById("demo6");
+        // output2.innerHTML = slider2.value;
+        // output5.innerHTML = slider5.value;
+        // output6.innerHTML = RandomForestmaxdepth.value;
+        XGBlearningrate.oninput = function() {
+          outputXGBlr.innerHTML = this.value/10;
         }
-        slider2.oninput = function() {
-          output2.innerHTML = this.value;
+        XGBmaxdepth.oninput = function() {
+            outputXGBmd.innerHTML = this.value;
         }
-        slider3.oninput = function() {
-          output3.innerHTML = this.value;
-          output4.innerHTML = (100 - this.value);
+        // slider5.oninput = function() {
+        //   output5.innerHTML = this.value/10;
+        // }
+        RandomForestnestimators.oninput = function() {
+          outputRFne.innerHTML = this.value;
         }
-        slider5.oninput = function() {
-          output5.innerHTML = this.value/10;
-        }
-        slider6.oninput = function() {
-          output6.innerHTML = this.value;
+        RandomForestmaxdepth.oninput = function() {
+            outputRFmd.innerHTML = this.value;
         }
         // slider4.oninput = function() {
         //   output4.innerHTML = this.value/10;
