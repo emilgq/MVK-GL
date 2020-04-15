@@ -1,0 +1,65 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<body>
+    <div id="login">
+        <h3 class="text-center text-white pt-5">Train Model</h3>
+        <div class="container">
+            <div id="login-row" class="row justify-content-center align-items-center">
+                <div id="login-column" class="col-md-6">
+                    <div id="login-box" class="col-md-12">
+                        <form id="login-form" class="form" action="" method="post">
+                            <h3 class="text-center text-info">Configure Model</h3>
+                            <div class="form-group">
+                                <label for="modelname" class="text-info">Model Name:</label><br>
+                                <input type="text" name="modelname" id="modelname" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="modeltype" class="text-info">Model Type:</label><br>
+                                <select id ="MLAlgorithms">
+                                    <option value="XGBoost">XGBoost</option>
+                                    <option value="Random Forest">Random Forest</option>
+                                    <option value="Linear Regression">Linear Regression</option>
+                                 </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="learningrate" class="text-info">Learning Rate:</label><br>
+                                <input type="range" min="0" max="10" value="5" class="slider" id="myRange">
+                                <p>Value: <span id="demo"></span></p>  
+                            </div>
+                            <div class="form-group">
+                                <label for="maxdepth" class="text-info">Max Depth:</label><br>
+                                <input type="text" name="maxdepth" id="maxdepth" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="trainsplit" class="text-info">Train Split:</label><br>
+                                <input type="text" name="trainsplit" id="trainsplit" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="valsplit" class="text-info">Validation Split:</label><br>
+                                <input type="text" name="valsplit" id="valsplit" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <input type="submit" name="submit" class="btn btn-info btn-md" value="Train model">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Display slider values -->
+    <script>
+        var slider = document.getElementById("myRange");
+        var output = document.getElementById("demo");
+
+        output.innerHTML = slider.value;
+        
+        slider.oninput = function() {
+          output.innerHTML = this.value/10;
+        }
+        </script>
+
+</body>
+{% endblock %}

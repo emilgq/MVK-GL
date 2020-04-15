@@ -1,37 +1,73 @@
 -- Skapa tre olika tables weather_data, weather_forecast, ml_models
-CREATE TABLE weather_data
-  (Ts TIMESTAMP PRIMARY KEY, Day INTEGER, Hour INTEGER, Month INTEGER, Temperature DECIMAL, Cloud_cover DECIMAL, Wind DECIMAL, Consumption DECIMAL);
+CREATE TABLE weather_data (
+    Ts TIMESTAMP PRIMARY KEY,
+    Day INTEGER,
+    Hour INTEGER,
+    Month INTEGER,
+    Temperature DECIMAL,
+    Cloud_cover DECIMAL,
+    Wind DECIMAL,
+    Consumption DECIMAL
+);
 
-CREATE TABLE weather_forecast
-  (Ts TIMESTAMP PRIMARY KEY, Temperature DECIMAL, Cloud_cover DECIMAL, Wind DECIMAL);
+CREATE TABLE weather_forecast (
+    Ts TIMESTAMP PRIMARY KEY,
+    Day INTEGER,
+    Hour INTEGER,
+    Month INTEGER,
+    Temperature DECIMAL,
+    Cloud_cover DECIMAL,
+    Wind DECIMAL
+);
 
-CREATE TABLE ml_models
-  (Model_id SERIAL PRIMARY KEY, Model_name VARCHAR(100), Time_creation TIMESTAMP default CURRENT_TIMESTAMP, Configurations json NOT NUll, Owner INTEGER);
-
+CREATE TABLE ml_models (
+    Model_id SERIAL PRIMARY KEY,
+    Model_name VARCHAR(100),
+    Time_creation TIMESTAMP default CURRENT_TIMESTAMP,
+    Configurations json NOT NUll,
+    Owner INTEGER,
+    Status BOOLEAN default FALSE,
+    Rmse DECIMAL default NULL
+);
 
 -- Select all för alla tabels
-SELECT * FROM weather_data;
+SELECT
+    *
+FROM
+    weather_data;
 
-SELECT * FROM weather_forecast;
+SELECT
+    *
+FROM
+    weather_forecast;
 
-SELECT * FROM ml_models;
-
+SELECT
+    *
+FROM
+    ml_models;
 
 -- Mall till insterts
-INSERT INTO weather_data (Timestamp, Day, Hour, Month, Temperature, Cloud_cover, Wind, Consumption) VALUES ();
+INSERT INTO weather_data (Timestamp, Day, Hour, Month, Temperature, Cloud_cover, Wind, Consumption)
+    VALUES ();
 
-INSERT INTO weather_forecast (Timestamp, Temperature, Cloud_cover, Wind) VALUES ();
+INSERT INTO weather_forecast (Timestamp, Day, Hour, Month, Temperature, Cloud_cover, Wind)
+    VALUES ();
 
-INSERT INTO ml_models (Model_name, Configurations, Owner) VALUES ();
+INSERT INTO ml_models (Model_name, Configurations, Owner)
+    VALUES ();
 
 -- Testdatan
 INSERT INTO ml_models (Model_name, Configurations, Owner)
-  VALUES ('Test1', '{"model-type": "XGBoost", "learning-rate": 0.6, "max-depth": 11, "train-split": 80, "validation-split": 20}', 1);
+    VALUES ('Test1', '{"model-type": "XGBoost", "learning-rate": 0.6, "max-depth": 11, "train-split": 80, "validation-split": 20}', 1);
+
 INSERT INTO ml_models (Model_name, Configurations, Owner)
-  VALUES ('Test2', '{"model-type": "RandomForest", "learning-rate": 0.5, "max-depth": 8, "train-split": 75, "validation-split": 25}', 1);
+    VALUES ('Test2', '{"model-type": "RandomForest", "learning-rate": 0.5, "max-depth": 8, "train-split": 75, "validation-split": 25}', 1);
+
 INSERT INTO ml_models (Model_name, Configurations, Owner)
-  VALUES ('Test3', '{"model-type": "XGBoost", "learning-rate": 0.5, "max-depth": 8, "train-split": 70, "validation-split": 30}', 1);
+    VALUES ('Test3', '{"model-type": "XGBoost", "learning-rate": 0.5, "max-depth": 8, "train-split": 70, "validation-split": 30}', 1);
+
 INSERT INTO ml_models (Model_name, Configurations, Owner)
-  VALUES ('Test4', '{"model-type": "XGBoost", "learning-rate": 0.4, "max-depth": 5, "train-split": 80, "validation-split": 20}', 1);
+    VALUES ('Test4', '{"model-type": "XGBoost", "learning-rate": 0.4, "max-depth": 5, "train-split": 80, "validation-split": 20}', 1);
+
 INSERT INTO ml_models (Model_name, Configurations, Owner)
-  VALUES ('Test5', '{"model-type": "LinearRegression", "learning-rate": 0.5, "max-depth": 8, "train-split": 80, "validation-split": 20}', 1);
+    VALUES ('Test5', '{"model-type": "LinearRegression", "learning-rate": 0.5, "max-depth": 8, "train-split": 80, "validation-split": 20}', 1);
