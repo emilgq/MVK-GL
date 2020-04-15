@@ -13,7 +13,7 @@ def is_logged_in(f):
     if session['logged_in']:
       return f(*args, **kwargs)
     else:
-      flash("Unauthorized", "danger")
+      flash("Please enter your credentials in order to access this feature.", "danger")
       return redirect(url_for("login"))
   return wrap
 
@@ -29,7 +29,7 @@ def login():
     password = request.form['password']
     if password == app.secret_key:
       session['logged_in'] = True
-      flash("Access authorized", "success")
+      flash("Access authorized, welcome :)", "success")
       return redirect(url_for("project"))
     else:
       error = "Unauthorized"
@@ -37,11 +37,18 @@ def login():
 
 @app.route('/logout')
 def logout():
-  session['logged_in'] = False
-  flash("Logged out", "success")
-  return redirect(url_for("project"))
+    if session['logged_in']:
+      session['logged_in'] = False
+      flash("You have been logged out.", "success")
+      return redirect(url_for("login"))
+    else:
+      session['logged_in'] = False
+      error = "You can't log out if you have yet to log in, silly"
+      return render_template('login.html', error=error)
+
 
 @app.route('/project')
+@is_logged_in
 def project():
   return render_template('project.html')
 
@@ -65,7 +72,7 @@ def train():
       "model-type": request.form['modeltype'],
       "learning-rate": float(request.form['learningrate']),
       "max-depth": int(request.form['maxdepth']),
-      "train-split": int(request.form['trainsplit']), 
+      "train-split": int(request.form['trainsplit']),
       "validation-split": int(request.form['valsplit']),
       "API-KEY": "MVK123"
     }
