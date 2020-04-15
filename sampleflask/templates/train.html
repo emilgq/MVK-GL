@@ -15,30 +15,105 @@
                                 <input type="text" name="modelname" id="modelname" class="form-control">
                             </div>
                             <div class="form-group">
-                                <label for="modeltype" class="text-info">Model Type:</label><br>
+                              <select name = "modeltype" id = "modeltype">
+            <option value = "woops" selected>Choose one</option>
+           <option value = "Random Forest">Random Forest</option>
+           <option value = "Linear Regression">Linear Regression</option>
+           <option value = "XGBoost">XGBoost</option>
+           </select>
+
+           <!-- <div id = "cardioyes" style = "display:none;">
+           <label for="How Long?">How Long?</label><br>
+           <input type = "text" name = "duration" />
+           </div> -->
+
+           <!-- XBG VALUES -->
+           <div id = "XGB" class="form-group" style = "display:none;">
+           <label for="learningrate">Learning Rate:</label><br>
+           <input type="range" min="0" max="10" value="0" class="slider" id="myRange">
+           <p>Value: <span id="demo"></span></p>
+
+
+           <!-- <div class="form-group">
+               <label for="learningrate" class="text-info">Learning Rate:</label><br>
+               <input type="range" min="0" max="10" value="5" class="slider" id="myRange">
+               <p>Value: <span id="demo"></span></p>
+           </div> -->
+
+           <label for="maxdepth" class="form-group">Max Depth:</label><br>
+           <input type="range" min="0" max="25" value="0" class="slider" id="myRange2">
+           <p>Value: <span id="demo2"></span></p>
+           </div>
+
+
+           <!-- LR VALUES -->
+           <div id = "LR" class ="form-group" style = "display:none;">
+           <label for="learningrate">Learning Rate:</label><br>
+           <input type="range" min="0" max="10" value="0" class="slider" id="myRange5">
+           <p>Value: <span id="demo5"></span></p>
+
+           <label for="maxdepth" class="form-group">Max Depth:</label><br>
+           <input type="range" min="0" max="25" value="0" class="slider" id="myRange6">
+           <p>Value: <span id="demo6"></span></p>
+
+           <label for="trainsplit" class="form-group">Train Split:</label><br>
+           <input type="range" min="0" max="100" value="0" class="slider" id="myRange3">
+           <p>Value: <span id="demo3"></span></p>
+
+           <label for="valsplit" class="form-group">Validation Split:</label><br>
+          <input type="hidden" min="0" max="100" value="0" class="slider" id="myRange4">
+          <p> <span id="demo4"></span></p>
+           </div>
+
+
+           <div id = "RF" class ="form-group" style = "display:none;">
+           <label for="learningrate">Learning Rate:</label><br>
+           <input type="range" min="0" max="10" value="0" class="slider" id="myRange5">
+           <p>Value: <span id="demo5"></span></p>
+
+           <label for="maxdepth" class="form-group">Max Depth:</label><br>
+           <input type="range" min="0" max="25" value="0" class="slider" id="myRange6">
+           <p>Value: <span id="demo6"></span></p>
+
+           <label for="trainsplit" class="form-group">Train Split:</label><br>
+           <input type="range" min="0" max="100" value="0" class="slider" id="myRange3">
+           <p>Value: <span id="demo3"></span></p>
+
+           <label for="valsplit" class="form-group">Validation Split:</label><br>
+          <input type="hidden" min="0" max="100" value="0" class="slider" id="myRange4">
+          <p> <span id="demo4"></span></p>
+           </div>
+          </div>
+                                <!-- <label for="modeltype" class="text-info">Model Type:</label><br>
                                 <select id ="MLAlgorithms">
                                     <option value="XGBoost">XGBoost</option>
                                     <option value="Random Forest">Random Forest</option>
                                     <option value="Linear Regression">Linear Regression</option>
-                                 </select>
-                            </div>
-                            <div class="form-group">
+                                 </select> -->
+
+                            <!-- <div class="form-group">
                                 <label for="learningrate" class="text-info">Learning Rate:</label><br>
                                 <input type="range" min="0" max="10" value="5" class="slider" id="myRange">
-                                <p>Value: <span id="demo"></span></p>  
-                            </div>
-                            <div class="form-group">
+                                <p>Value: <span id="demo"></span></p>
+                            </div> -->
+                            <!-- <div class="form-group">
                                 <label for="maxdepth" class="text-info">Max Depth:</label><br>
-                                <input type="text" name="maxdepth" id="maxdepth" class="form-control">
-                            </div>
-                            <div class="form-group">
-                                <label for="trainsplit" class="text-info">Train Split:</label><br>
-                                <input type="text" name="trainsplit" id="trainsplit" class="form-control">
-                            </div>
-                            <div class="form-group">
-                                <label for="valsplit" class="text-info">Validation Split:</label><br>
-                                <input type="text" name="valsplit" id="valsplit" class="form-control">
-                            </div>
+                                <input type="range" min="0" max="10" value="5" class="slider" id="myRange2">
+                                <p>Value: <span id="demo2"></span></p>
+                            </div> -->
+
+                            <!-- <div class="form-group">
+                                <!-- <label for="trainsplit" class="text-info">Train Split:</label><br> -->
+                                <!-- <input type="hidden" min="0" max="100" value="" class="slider" id="myRange3">
+                                <p> <span id="demo3"></span></p>
+                            </div> -->
+
+
+                            <!-- <div class="form-group">
+                                 <label for="valsplit" class="text-info">Validation Split:</label><br>
+                                <input type="hidden" min="0" max="100" value="" class="slider" id="myRange4">
+                                <p> <span id="demo4"></span></p>
+                            </div> -->
                             <div class="form-group">
                                 <input type="submit" name="submit" class="btn btn-info btn-md" value="Train model">
                             </div>
@@ -52,13 +127,65 @@
     <!-- Display slider values -->
     <script>
         var slider = document.getElementById("myRange");
+        var slider2 = document.getElementById("myRange2");
+        var slider3 = document.getElementById("myRange3");
+        var slider4 = document.getElementById("myRange4");
+        var slider5 = document.getElementById("myRange5");
+        var slider6 = document.getElementById("myRange6");
         var output = document.getElementById("demo");
+        var output2 = document.getElementById("demo2");
+        var output3 = document.getElementById("demo3");
+        var output4 = document.getElementById("demo4");
+        var output5 = document.getElementById("demo5");
+        var output6 = document.getElementById("demo6");
 
         output.innerHTML = slider.value;
-        
+        output2.innerHTML = slider2.value;
+        output3.innerHTML = slider3.value;
+        output4.innerHTML = slider4.value;
+        output5.innerHTML = slider5.value;
+        output6.innerHTML = slider6.value;
+
         slider.oninput = function() {
           output.innerHTML = this.value/10;
         }
+        slider2.oninput = function() {
+          output2.innerHTML = this.value;
+        }
+        slider3.oninput = function() {
+          output3.innerHTML = this.value;
+          output4.innerHTML = (100 - this.value);
+        }
+        slider5.oninput = function() {
+          output5.innerHTML = this.value/10;
+        }
+        slider6.oninput = function() {
+          output6.innerHTML = this.value;
+        }
+        // slider4.oninput = function() {
+        //   output4.innerHTML = this.value/10;
+        // }
+
+        $('#modeltype').change(function(){
+        selection = $(this).val();
+        switch(selection)
+        {
+            //show the <div> or not
+            case 'Linear Regression':
+                $('#LR').show();
+                break;
+            case 'XGBoost':
+                $('#XGB').show();
+                break;
+                case 'Random Forest':
+                    $('#RF').show();
+                    break;
+                default:
+                $('#cardioyes').hide();
+                break;
+        }
+      });
+
         </script>
 
 </body>
