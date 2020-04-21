@@ -1,6 +1,7 @@
 import pandas as pd
 import xgboost as xgb
 import numpy as np
+import datetime as dt
 import pickle
 from numpy import loadtxt
 from sklearn.metrics import mean_squared_error
@@ -40,8 +41,16 @@ def evaluate_model(X_test, y_true, model):
 def predictModel(modelID):
     loaded_model = pickle.load(open('/home/emil/KTH/year2/MVK/MVK-GL/back-end/ml/trained_models/' + str(modelID), 'rb'))
     dataset = getData('forecast')
+
+    # Convert col 1 (timestamps) to datetime then back to string in HH:MM format
+    hours = dataset.iloc[:,0].apply(lambda x: dt.datetime.strptime(x, '%Y-%m-%dT%H:%M:%S').strftime('%H:%M')) 
+    
     X = dataset.iloc[:,1:6]
-    return list(loaded_model.predict(X))
+    prediction = loaded_model.predict(X)
+
+    # Zip hours with prediction
+    response = dict(zip(list(hours), list(prediction)))
+    return response
 
 def createModel(configurations, modelID):
     if configurations['model-type'] == "XGBoost":
