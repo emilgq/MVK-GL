@@ -1,4 +1,4 @@
-import random, re, datetime, time, sys
+import random, re, datetime, time, sys, os, errno
 from flask import Flask, json, abort, request, Response
 import psycopg2
 
@@ -82,6 +82,43 @@ def create_new_model(model_id, configurations):
   runDBQuery(updatequery, updateParameters)
   return True
 
+# Delete model as background process
+@celery.task
+def delete_model(model_id):
+  # Wait for model to complete training before deletion
+  while True:
+    # Evaluate if model is ready to be deleted
+    query = "select status from ml_models where model_id = %s"
+    try:
+      ready = runDBQuery(query, (model_id,))[0][0][0]
+    except Exception as error:
+      raise Exception(error)
+
+    if (ready):
+      print('Model {} ready for deletion'.format(model_id))
+      # Delete model from ml/trained_models
+      if os.path.exists("../ml/trained_models/" + model_id):
+        os.remove("../ml/trained_models/" + model_id)
+        print('ML Object deleted')
+
+        query = "delete from ml_models where model_id = %s"
+        runDBQuery(query, (model_id,))
+        print('Model reference deleted from DB')
+
+        # End while loop
+        break
+      else:
+        print('ML Object not found') 
+        raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), os.path.abspath("../ml/trained_models/" + model_id)) 
+      
+    else:
+      print('Model is not ready')
+
+
+  
+  # Add function which removes save model from filesystem if model is trained or abort training in case still training
+
+
 # Model load prediction
 def predict_model(model_id):
   print('Predicting load for model with id: ' + model_id)
@@ -111,13 +148,13 @@ def modelresult(model_id):
 
   # Remove model
   if request.method == 'DELETE':
+    print("received DEL req for model id: {}".format(model_id))
     args = request.get_json()
     try:
       if args['API-KEY'] != APIKEY:
         abort(Response('Unauthorized', 400))
-      query = "delete from ml_models where model_id = %s"
-      runDBQuery(query, (model_id,))
-      # Add function which removes save model from filesystem if model is trained or abort training in case still training
+      # Run celery process of deleting model
+      delete_model.delay(model_id)
       return Response(json.dumps({"message": "Succesfully deleted model with id: {}".format(model_id)}), 200)
     except Exception as e:
       abort(Response('Error: {}'.format(e), 400))
