@@ -24,7 +24,7 @@ configurations = {
 }
 
 
-def testCrossVal():
+def testCrossVal(configurations):
     dataset = getData('data')
     X = dataset.iloc[:,1:6]
     y = dataset.iloc[:,7]
@@ -41,16 +41,55 @@ def testCrossVal():
     min_samples_leaf = [1, 2, 4]
     bootstrap = [True, False]
 
-    
+    modeltype = configurations['model-type']
 
-    random_grid = {'n_estimators': n_estimators,
-               'max_features': max_features,
-               'max_depth': max_depth,
-               'min_samples_split': min_samples_split,
-               'min_samples_leaf': min_samples_leaf,
-               'bootstrap': bootstrap}
+    if modeltype == "RandomForest":
+        model = RandomForestRegressor()
+        # Set the different values
+        n_estimators = [int(x) for x in np.linspace(start = 200, stop = 2000, num = 10)]
+        max_features = ['auto', 'sqrt']
+        max_depth = []
+        max_depth.append(None)
+        min_samples_split = [int(x) for x in np.linspace(10, 110, num = 11)]
+        min_samples_leaf = [1, 2, 4]
+        bootstrap = [True, False]
+        random_grid = {
+            'n_estimators': n_estimators,
+            'max_features': max_features,
+            'max_depth': max_depth,
+            'min_samples_split': min_samples_split,
+            'min_samples_leaf': min_samples_leaf,
+            'bootstrap': bootstrap}
+    if modeltype == "XGBoost":
+        model = xgb.XGBRegressor()
+        learning_rate = [0.1,0.2,0.3,0.4,0.5, 0.6,0.7,0.8,0.9]
+        min_split_loss = [0.5,1]
+        max_depth = [4,6,8,10,12]
+        min_child_weight = [0.5,1,2,3,4,5,6,7,8,9,10]
+        colsample_bytree = [0.3,0.4,0.6,0.7]
 
-    rf_random = RandomizedSearchCV(estimator = model, param_distributions = random_grid, n_iter = 50, cv = kFold, verbose=2, random_state=42, n_jobs = -1)
+        random_grid = {
+            'learning_rate': learning_rate,
+            'min_split_loss': min_split_loss,
+            'max_depth': max_depth,
+            'min_child_weight': min_child_weight,
+            'colsample_bytree': colsample_bytree
+        }
+    if modeltype == "SVR":
+        model = svm.SVR()
+        kernel = ['poly','rbf','sigmoid']
+        C = [0.5,1,1.5,2]
+        epsilon = [0.1,0.3,0.5,0.7]
+        tol = [1e-3, 1e-4, 0.5e-3]
+
+        random_grid = {
+            'kernel': kernel,
+            'C': C,
+            'epsilon': epsilon,
+            'tol': tol
+        }
+
+    model_random = RandomizedSearchCV(estimator = model, param_distributions = random_grid, n_iter = 25, cv = kFold, verbose=2, random_state=42, n_jobs = -1)
 
     hp = [{
         'n_estimators' : [75,125, 200, 400],
@@ -69,10 +108,10 @@ def testCrossVal():
     # print(evaluate_model(X_test, y_test, grid.best_estimator_))
     # print(grid.cv_results_['mean_test_score'][grid.best_index_])
 
-    rf_random.fit(X_train, y_train)
-    print("RMSE with radnomsearch: " + str(evaluate_model(X_test,y_test, rf_random.best_estimator_)))
+    model_random.fit(X_train, y_train)
+    print("RMSE with radnomsearch: " + str(evaluate_model(X_test,y_test, model_random.best_estimator_)))
 
-    model = RandomForestRegressor(n_estimators= 125, max_depth= 18)
+    model = xgb.XGBRegressor()
     print("RMSE without ranbomsearch: " + str(evaluate_model(X_test, y_test, model.fit(X_train, y_train))))
     # results = cross_val_score(model, X,y, cv=kFold)
     # print("Accuracy: %.2f%% (%.2f%%)" % (results.mean()*100, results.std()*100))
@@ -145,5 +184,5 @@ def createModel(configurations, modelID):
 
 # Only for testing
 if __name__== '__main__':
-    testCrossVal()
+    testCrossVal(configurations)
     
