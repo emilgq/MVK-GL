@@ -82,8 +82,7 @@ def create_new_model(model_id, configurations):
   runDBQuery(updatequery, updateParameters)
   return True
 
-# Create model in background process
-@celery.task
+# Model load prediction
 def predict_model(model_id):
   print('Predicting load for model with id: ' + model_id)
   load = predictModel(model_id)
@@ -104,7 +103,7 @@ def modelresult(model_id):
     if len(result) == 0:
       abort(Response('Model not found', 404))
 
-    # Pass weather forecast through trained model (.score())
+    # Compile response object with headers and tuple content
     response = dict(zip(cols, result[0]))
     # Add result column
     response['result'] = str(predict_model(model_id))
