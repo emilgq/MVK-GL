@@ -1,19 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'layout.html' %}
 
+{% block body %}
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-  <title> GreenLytics API test graf</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
   <!--//chart.js loaded.-->
 </head>
 
 <body>
-  <h1> GreenLytics API placeholder graph </h1>
+  <h1 class="text-center text-info"> GreenLytics API placeholder graph </h1>
 
-  <a href="http://127.0.0.1:8080/resourceManagement.html"><button style="border-radius:10px;">
+  <a href="http://127.0.0.1:5000/project"><button style="border-radius:10px;" class="btn btn-info btn-md">
       Go back to Resource management
     </button></a>
   </button></a>
@@ -25,7 +21,9 @@
 <canvas id="chart" width="800" height="200"> </canvas>
 
   <script>
-    const url = 'http://35.228.239.24/api/v1/project/1'
+    const model = '{{ model_id }}';
+    const url = 'http://35.228.239.24/api/v1/project/'.concat(model);
+    console.log(model);
 
     chartNow();
     async function chartNow() {
@@ -89,14 +87,6 @@
     }
 
     getData();
-
-    // const placeHolder_api_url = ''
-    //
-    // async function getData() {
-    //   const response = await fetch(placeHolder_api_url);
-    // }
-    console.log("hej");
   </script>
 </body>
-
-</html>
+{% endblock %}
