@@ -55,14 +55,15 @@ def testCrossVal(configurations):
         learning_rate = [0.05,0.1,0.2,0.25,0.3]
         min_split_loss = [0.5,1]
         max_depth = [4,6,8,9,10]
-        min_child_weight = [0.5,1,2,3,4,5,6,7,8,9,10]
-        colsample_bytree = [0.3,0.4,0.6,0.7]
+        max_depth = [8]
+        min_child_weight = [0.5,2,4,6,8]
+        #colsample_bytree = [0.3,0.4,0.6,0.7]
 
         random_grid = {
             'learning_rate': learning_rate,
-            #'min_split_loss': min_split_loss,
+            'min_split_loss': min_split_loss,
             'max_depth': max_depth,
-            #'min_child_weight': min_child_weight,
+            'min_child_weight': min_child_weight,
             #'colsample_bytree': colsample_bytree
         }
     if modeltype == "SVR":
@@ -79,7 +80,7 @@ def testCrossVal(configurations):
             'tol': tol
         }
 
-    model_random = RandomizedSearchCV(estimator = model, param_distributions = random_grid, n_iter = 100, cv = kFold, verbose=2, random_state=42, n_jobs = -1)
+    model_random = RandomizedSearchCV(estimator = model, param_distributions = random_grid, n_iter = 150, cv = kFold, verbose=2, random_state=42, n_jobs = -1)
 
     hp = [{
         'n_estimators' : [75,125, 200, 400],
@@ -183,6 +184,6 @@ def createModel(configurations, modelID):
 
 # Only for testing
 if __name__== '__main__':
-    #testCrossVal(configurations)
+    testCrossVal(configurations)
     tetsModel(configurations)
     
