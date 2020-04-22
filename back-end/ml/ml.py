@@ -55,7 +55,7 @@ def testCrossVal(configurations):
         learning_rate = [0.05,0.1,0.2,0.25,0.3]
         min_split_loss = [0.5,1]
         max_depth = [4,6,8,9,10]
-        max_depth = [8]
+        max_depth = [7,8,9]
         min_child_weight = [0.5,2,4,6,8]
         #colsample_bytree = [0.3,0.4,0.6,0.7]
 
@@ -92,12 +92,6 @@ def testCrossVal(configurations):
         }] 
     grid = GridSearchCV(estimator=model, param_grid= random_grid, cv= kFold, scoring= 'r2' )
     grid = grid.fit(X_train,y_train)
-    # print(grid.best_score_)
-    # print(grid.best_estimator_)
-    # print(grid.best_params_)
-    # print(grid.best_index_)
-    #print(evaluate_model(X_test, y_test, grid.best_estimator_))
-    # print(grid.cv_results_['mean_test_score'][grid.best_index_])
 
     model_random.fit(X_train, y_train)
     print("RMSE with radnomsearch: " + str(evaluate_model(X_test,y_test, model_random.best_estimator_)))
@@ -105,12 +99,6 @@ def testCrossVal(configurations):
 
     print("RMSE with gridsearch: " + str(evaluate_model(X_test, y_test, grid.best_estimator_)))
 
-    #default_model = xgb.XGBRegressor(learning_rate = configurations['learning-rate'], max_depth = configurations['max-depth'])
-   # print("RMSE without ranbomsearch: " + str(evaluate_model(X_test, y_test, default_model.fit(X_train, y_train))))
-    # results = cross_val_score(model, X,y, cv=kFold)
-    # print("Accuracy: %.2f%% (%.2f%%)" % (results.mean()*100, results.std()*100))
-
-    #model = xgb.XGBRegressor(grid.best_params_)
    
 def tetsModel(configurations):
     dataset = getData('data')
@@ -119,6 +107,7 @@ def tetsModel(configurations):
     X_train, X_test, y_train, y_test = train_test_split(X, y,test_size=configurations['validation-split'], random_state=123)
     default_model = xgb.XGBRegressor(learning_rate = configurations['learning-rate'], max_depth = configurations['max-depth'])
     print("RMSE without ranbomsearch: " + str(evaluate_model(X_test, y_test, default_model.fit(X_train, y_train))))
+
 def getData(type):
     try:
         url = "http://35.228.239.24/api/v1/weather-"+type
