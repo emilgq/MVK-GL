@@ -119,7 +119,7 @@ def train():
         "configurations":{
         "model-type": request.form['modeltype'],
         "kernel": request.form['SVR KERNEL'],
-        "C": int(request.form['CSVR']),
+        "c": int(request.form['CSVR']),
         "train-split": int(request.form['trainsplitSVR'])/100,
         "validation-split": (100-int(request.form['trainsplitSVR']))/100,},
         "API-KEY": "MVK123"
