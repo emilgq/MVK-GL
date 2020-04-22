@@ -13,8 +13,8 @@ from urllib.request import urlopen
 
 
 configurations = {
-    "learning-rate": 0.1,
-    "max-depth": 12,
+    "learning-rate": 0.24,
+    "max-depth": 8,
     "n-estimators": 100,
     "kernel": 'poly',
     "c": 10,
@@ -28,18 +28,8 @@ def testCrossVal(configurations):
     dataset = getData('data')
     X = dataset.iloc[:,1:6]
     y = dataset.iloc[:,7]
-    model = RandomForestRegressor()
-    X_train, X_test, y_train, y_test = train_test_split(X, y,)
+    X_train, X_test, y_train, y_test = train_test_split(X, y,test_size=configurations['validation-split'], random_state=123 )
     kFold = KFold(n_splits=3, shuffle=True, random_state=13)
-
-    n_estimators = [int(x) for x in np.linspace(start = 200, stop = 2000, num = 10)]
-
-    max_features = ['auto', 'sqrt']
-    max_depth = [int(x) for x in np.linspace(10, 110, num = 11)]
-    max_depth.append(None)
-    min_samples_split = [2, 5, 10]
-    min_samples_leaf = [1, 2, 4]
-    bootstrap = [True, False]
 
     modeltype = configurations['model-type']
 
@@ -62,18 +52,18 @@ def testCrossVal(configurations):
             'bootstrap': bootstrap}
     if modeltype == "XGBoost":
         model = xgb.XGBRegressor()
-        learning_rate = [0.1,0.2,0.3,0.4,0.5, 0.6,0.7,0.8,0.9]
+        learning_rate = [0.05,0.1,0.2,0.25,0.3]
         min_split_loss = [0.5,1]
-        max_depth = [4,6,8,10,12]
+        max_depth = [4,6,8,9,10]
         min_child_weight = [0.5,1,2,3,4,5,6,7,8,9,10]
         colsample_bytree = [0.3,0.4,0.6,0.7]
 
         random_grid = {
             'learning_rate': learning_rate,
-            'min_split_loss': min_split_loss,
+            #'min_split_loss': min_split_loss,
             'max_depth': max_depth,
-            'min_child_weight': min_child_weight,
-            'colsample_bytree': colsample_bytree
+            #'min_child_weight': min_child_weight,
+            #'colsample_bytree': colsample_bytree
         }
     if modeltype == "SVR":
         model = svm.SVR()
@@ -89,7 +79,7 @@ def testCrossVal(configurations):
             'tol': tol
         }
 
-    model_random = RandomizedSearchCV(estimator = model, param_distributions = random_grid, n_iter = 25, cv = kFold, verbose=2, random_state=42, n_jobs = -1)
+    model_random = RandomizedSearchCV(estimator = model, param_distributions = random_grid, n_iter = 100, cv = kFold, verbose=2, random_state=42, n_jobs = -1)
 
     hp = [{
         'n_estimators' : [75,125, 200, 400],
@@ -99,26 +89,35 @@ def testCrossVal(configurations):
         'min_samples_leaf': [1,4],
         'min_samples_split': [2,10]
         }] 
-    # grid = GridSearchCV(estimator=model, param_grid= hp, cv= kFold, scoring= 'r2' )
-    # grid = grid.fit(X_train,y_train)
+    grid = GridSearchCV(estimator=model, param_grid= random_grid, cv= kFold, scoring= 'r2' )
+    grid = grid.fit(X_train,y_train)
     # print(grid.best_score_)
     # print(grid.best_estimator_)
     # print(grid.best_params_)
     # print(grid.best_index_)
-    # print(evaluate_model(X_test, y_test, grid.best_estimator_))
+    #print(evaluate_model(X_test, y_test, grid.best_estimator_))
     # print(grid.cv_results_['mean_test_score'][grid.best_index_])
 
     model_random.fit(X_train, y_train)
     print("RMSE with radnomsearch: " + str(evaluate_model(X_test,y_test, model_random.best_estimator_)))
+    print(model_random.best_params_)
 
-    model = xgb.XGBRegressor()
-    print("RMSE without ranbomsearch: " + str(evaluate_model(X_test, y_test, model.fit(X_train, y_train))))
+    print("RMSE with gridsearch: " + str(evaluate_model(X_test, y_test, grid.best_estimator_)))
+
+    #default_model = xgb.XGBRegressor(learning_rate = configurations['learning-rate'], max_depth = configurations['max-depth'])
+   # print("RMSE without ranbomsearch: " + str(evaluate_model(X_test, y_test, default_model.fit(X_train, y_train))))
     # results = cross_val_score(model, X,y, cv=kFold)
     # print("Accuracy: %.2f%% (%.2f%%)" % (results.mean()*100, results.std()*100))
 
     #model = xgb.XGBRegressor(grid.best_params_)
    
-
+def tetsModel(configurations):
+    dataset = getData('data')
+    X = dataset.iloc[:,1:6]
+    y = dataset.iloc[:,7]
+    X_train, X_test, y_train, y_test = train_test_split(X, y,test_size=configurations['validation-split'], random_state=123)
+    default_model = xgb.XGBRegressor(learning_rate = configurations['learning-rate'], max_depth = configurations['max-depth'])
+    print("RMSE without ranbomsearch: " + str(evaluate_model(X_test, y_test, default_model.fit(X_train, y_train))))
 def getData(type):
     try:
         url = "http://35.228.239.24/api/v1/weather-"+type
@@ -184,5 +183,6 @@ def createModel(configurations, modelID):
 
 # Only for testing
 if __name__== '__main__':
-    testCrossVal(configurations)
+    #testCrossVal(configurations)
+    tetsModel(configurations)
     
