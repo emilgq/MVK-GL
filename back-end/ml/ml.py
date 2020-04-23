@@ -23,7 +23,9 @@ configurations = {
     "validation-split": 0.20   
 }
 
-
+# Beta-version
+# If we use randomsearch we will need to have more values.
+# Not all of the hyperparametrs are used, maybe add more later. 
 def testCrossVal(configurations):
     dataset = getData('data')
     X = dataset.iloc[:,1:6]
@@ -33,6 +35,7 @@ def testCrossVal(configurations):
 
     modeltype = configurations['model-type']
 
+    # Need to optimize to find the best intervall of parameters.
     if modeltype == "RandomForest":
         model = RandomForestRegressor()
         # Set the different values
@@ -51,6 +54,7 @@ def testCrossVal(configurations):
             'min_samples_leaf': min_samples_leaf,
             'bootstrap': bootstrap}
     if modeltype == "XGBoost":
+        #Maybe needs to change depending on random/grid search.
         model = xgb.XGBRegressor()
         learning_rate = [0.05,0.1,0.2,0.25,0.3]
         min_split_loss = [0.5,1]
@@ -80,16 +84,10 @@ def testCrossVal(configurations):
             'tol': tol
         }
 
+    # Randomized search for best hyperparameters
     model_random = RandomizedSearchCV(estimator = model, param_distributions = random_grid, n_iter = 150, cv = kFold, verbose=2, random_state=42, n_jobs = -1)
 
-    hp = [{
-        'n_estimators' : [75,125, 200, 400],
-        'max_depth' : [80,90,100,110],
-        'bootstrap': [True],
-        'max_features': ['auto','sqrt'],
-        'min_samples_leaf': [1,4],
-        'min_samples_split': [2,10]
-        }] 
+    # Gridsearch for best hyperparameters
     grid = GridSearchCV(estimator=model, param_grid= random_grid, cv= kFold, scoring= 'r2' )
     grid = grid.fit(X_train,y_train)
 
