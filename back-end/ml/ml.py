@@ -39,7 +39,7 @@ def evaluate_model(X_test, y_true, model):
 
 
 def predictModel(modelID):
-    loaded_model = pickle.load(open('/home/emil/KTH/year2/MVK/MVK-GL/back-end/ml/trained_models/' + str(modelID), 'rb'))
+    loaded_model = pickle.load(open('/home/emil_gunnbergquerat/MVK-GL/back-end/ml/trained_models/' + str(modelID), 'rb'))
     dataset = getData('forecast')
 
     # Convert col 1 (timestamps) to datetime then back to string in HH:MM format
@@ -78,7 +78,7 @@ def createModel(configurations, modelID):
     
     # Save model to local file
     try:
-        pickle.dump(trained_model, open('/home/emil/KTH/year2/MVK/MVK-GL/back-end/ml/trained_models/' + str(modelID), 'wb'))
+        pickle.dump(trained_model, open('/home/emil_gunnbergquerat/MVK-GL/back-end/ml/trained_models/' + str(modelID), 'wb'))
     except FileNotFoundError as error:
         raise FileNotFoundError(error)
         
