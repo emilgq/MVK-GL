@@ -58,6 +58,7 @@ def createModel(configurations, modelID):
         default_model = xgb.XGBRegressor()
     if configurations['model-type'] == "LinearRegression":
         model = LinearRegression()
+        default_model = LinearRegression()
     if configurations['model-type'] == "RandomForest":
         model = RandomForestRegressor(max_depth=configurations['max-depth'], n_estimators = configurations['n-estimators'])
         default_model = RandomForestRegressor()
