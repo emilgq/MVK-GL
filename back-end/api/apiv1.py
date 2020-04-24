@@ -145,7 +145,21 @@ def project():
       abort(Response('Model type \"{}\" is not provided in this application. Select \"XGBoost\", \"RandomForest\", \"SVR\", or \"LinearRegression\"'.format(configurations['model-type']),400))
     if (configurations['train-split']+configurations['validation-split'] != 100):
       abort(Response('Split must total to 100',400))
-
+    if (configurations['model-type'] == 'XGBoost'):
+        if (configurations['learning-rate'] < 0 || configurations['learning-rate'] > 1):
+            abort(Response('Lerning rate must be a number from 0 to 1',400))
+        if (configurations['max-depth'] <= 0):
+            abort(Response('Max depth must be a positive number larger than 0',400))
+    if (configurations['model-type'] == 'RandomForest'):
+        if (configurations['n_estimators'] <= 0):
+            abort(Response('n-estimator must be a positive number larger than 0',400))
+        if (configurations['max-depth'] <= 0):
+            abort(Response('Max depth must be a positive number larger than 0',400))
+    if (configurations['model-type'] == 'SVR'):
+        if configurations['kernel'] not in ['linear', 'poly', 'rbf', 'sigmoid']:
+             abort(Response('Kernel type \"{}\" is not provided in this application. Select \"linear\", \"poly\", \"rbf\", or \"sigmoid\"'.format(configurations['kernel']),400))
+        if (configurations['c'] <= 0):
+            abort(Response('C must be a positive number larger than 0',400)) #Vet inte om denna parameter heter C!!
     # Run machine learning module
 
     # Fetch reference from database
