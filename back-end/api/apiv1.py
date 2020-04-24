@@ -151,7 +151,7 @@ def project():
         if (configurations['max-depth'] <= 0):
             abort(Response('Max depth must be a positive number larger than 0',400))
     if (configurations['model-type'] == 'RandomForest'):
-        if (configurations['n_estimators'] <= 0):
+        if (configurations['n-estimators'] <= 0):
             abort(Response('n-estimator must be a positive number larger than 0',400))
         if (configurations['max-depth'] <= 0):
             abort(Response('Max depth must be a positive number larger than 0',400))
@@ -283,7 +283,9 @@ def weatherData():
   def benchmark():
     if request.method == 'GET'
 
-      response['result'] = dict(zip(testTimes, testLoadBenchmark))
+      hoursLoad = predict_model(0):
+
+      response['result'] = dict(zip(hoursLoad))
       response['model-name'] = 'Benchmark'
       response['model-type'] = 'LinearRegression'
 
