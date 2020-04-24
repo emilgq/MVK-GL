@@ -11,11 +11,14 @@ app.secret_key = 'MVK123'
 def is_logged_in(f):
   @wraps(f)
   def wrap(*args, **kwargs):
-    if session['logged_in']:
-      return f(*args, **kwargs)
-    else:
-      flash("Unauthorized. Please enter you credentials to access this feature.", "danger")
-      return redirect(url_for("login"))
+      try:
+          if session['logged_in']:
+              return f(*args, **kwargs)
+          else:
+              flash("Unauthorized. Please enter you credentials to access this feature.", "danger")
+              return redirect(url_for("login"))
+      except KeyError:
+          return redirect(url_for("login"))
   return wrap
 
 # Sample code for rendering and serving html templates
