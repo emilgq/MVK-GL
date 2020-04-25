@@ -68,11 +68,19 @@
                                 <input type="number" min="0"  value="0" class="slider" id="myRange2" name = "maxdepthXG">
                                 <p>Your selected max depth is: <span id="demo2"></span></p> -->
                                 <label for="trainsplit" class="form-group">Train Split:</label><br>
-                                <input type="range" min="0" max="100" value="0" class="slider" id="myRange3" name ="trainsplitSVR">
+                                <input type="range" min="0" max="100" value="0" class="slider" id="myRange7" name ="trainsplitSVR">
+                                <p>Value: <span id="demo7"></span></p>
+                                <label for="valsplit" class="form-group">Validation Split:</label><br>
+                                <input type="hidden" min="0" max="100" value="0" class="slider" id="myRange8" name = "valsplitSVR">
+                                <p>Value: <span id="demo8"></span></p>
+
+                                <!-- <label for="trainsplit" class="form-group">Train Split:</label><br>
+                                <input type="range" min="0" max="100" value="0" class="slider" id="myRange3" name ="trainsplitXG">
                                 <p>Value: <span id="demo3"></span></p>
                                 <label for="valsplit" class="form-group">Validation Split:</label><br>
-                                <input type="hidden" min="0" max="100" value="0" class="slider" id="myRange4" name = "valsplitSVR">
-                                <p> <span id="demo4"></span></p>
+                                <input type="hidden" min="0" max="100" value="0" class="slider" id="myRange4" name = "valsplitXG">
+                                <p> <span id="demo4"></span></p> -->
+
                             </div>
                             <!-- LR VALUES -->
                             <!-- <div id = "LR" class ="form-group" style = "display:none;">
@@ -98,11 +106,11 @@
                                 <input type="range" min="0" max="25" value="0" class="slider" id="myRange6" name = "maxdepthRF">
                                 <p>Value: <span id="demo6"></span></p>
                                 <label for="trainsplit" class="form-group">Train Split:</label><br>
-                                <input type="range" min="0" max="100" value="0" class="slider" id="myRange3" name = "trainsplitRF">
-                                <p>Value: <span id="demo3"></span></p>
+                                <input type="range" min="0" max="100" value="0" class="slider" id="myRange9" name = "trainsplitRF">
+                                <p>Value: <span id="demo9"></span></p>
                                 <label for="valsplit" class="form-group">Validation Split:</label><br>
-                                <input type="hidden" min="0" max="100" value="0" class="slider" id="myRange4" name = "valsplitRF">
-                                <p> <span id="demo4"></span></p>
+                                <input type="hidden" min="0" max="100" value="0" class="slider" id="myRange10" name = "valsplitRF">
+                                <p>Value: <span id="demo10"></span></p>
                             </div>
                             </div>
                                 <!-- <label for="modeltype" class="text-info">Model Type:</label><br>
@@ -149,18 +157,29 @@
         var slider4 = document.getElementById("myRange4");
         var slider5 = document.getElementById("myRange5");
         var slider6 = document.getElementById("myRange6");
+        var slider7 = document.getElementById("myRange7");
+        var slider8 = document.getElementById("myRange8");
+        var slider9 = document.getElementById("myRange9");
+        var slider10 = document.getElementById("myRange10");
         var output = document.getElementById("demo");
         var output2 = document.getElementById("demo2");
         var output3 = document.getElementById("demo3");
         var output4 = document.getElementById("demo4");
         var output5 = document.getElementById("demo5");
         var output6 = document.getElementById("demo6");
+        var output7 = document.getElementById("demo7");
+        var output8 = document.getElementById("demo8");
+        var output9 = document.getElementById("demo9");
+        var output10 = document.getElementById("demo10");
+
         output.innerHTML = slider.value;
         output2.innerHTML = slider2.value;
         output3.innerHTML = slider3.value;
         output4.innerHTML = slider4.value;
         output5.innerHTML = slider5.value;
         output6.innerHTML = slider6.value;
+        output7.innerHTML = slider7.value;
+        output9.innerHTML = slider9.value;
         slider.oninput = function() {
           output.innerHTML = this.value/10;
         }
@@ -177,6 +196,14 @@
         slider6.oninput = function() {
           output6.innerHTML = this.value;
         }
+        slider7.oninput = function() {
+          output7.innerHTML = this.value;
+          output8.innerHTML = (100 - this.value);
+        }
+        slider9.oninput = function() {
+          output9.innerHTML = this.value;
+          output10.innerHTML = (100 - this.value);
+        }
         // slider4.oninput = function() {
         //   output4.innerHTML = this.value/10;
         // }
@@ -189,21 +216,25 @@
                 $('#LR').show();
                 $('#XGB').hide();
                 $('#RF').hide();
+                $('#SVR').hide();
                 break;
             case 'XGBoost':
                 $('#XGB').show();
                 $('#RF').hide();
                 $('#LR').hide();
+                $('#SVR').hide();
                 break;
             case 'RandomForest':
                 $('#RF').show();
                 $('#XGB').hide();
                 $('#LR').hide();
+                $('#SVR').hide();
                 break;
             case 'Default':
                 $('#RF').hide();
                 $('#XGB').hide();
                 $('#LR').hide();
+                $('#SVR').hide();
                 break;
             case 'SVR':
                 $('#RF').hide();
@@ -215,6 +246,7 @@
                 $('#RF').hide();
                 $('#XGB').hide();
                 $('#LR').hide();
+                $('#SVR').hide();
                 break;
         }
       });
