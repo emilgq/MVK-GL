@@ -1,6 +1,7 @@
 import pandas as pd
 import xgboost as xgb
 import numpy as np
+import datetime as dt
 import pickle
 from numpy import loadtxt
 from sklearn.metrics import mean_squared_error
@@ -131,10 +132,18 @@ def evaluate_model(X_test, y_true, model):
 
 
 def predictModel(modelID):
-    loaded_model = pickle.load(open('/home/emil/KTH/year2/MVK/MVK-GL/back-end/ml/trained_models/' + str(modelID), 'rb'))
+    loaded_model = pickle.load(open('/home/emil_gunnbergquerat/MVK-GL/back-end/ml/trained_models/' + str(modelID), 'rb'))
     dataset = getData('forecast')
+
+    # Convert col 1 (timestamps) to datetime then back to string in HH:MM format
+    hours = dataset.iloc[:,0].apply(lambda x: dt.datetime.strptime(x, '%Y-%m-%dT%H:%M:%S').strftime('%H:%M')) 
+    
     X = dataset.iloc[:,1:6]
-    return list(loaded_model.predict(X))
+    prediction = loaded_model.predict(X)
+
+    # Zip hours with prediction
+    response = dict(zip(list(hours), list(prediction)))
+    return response
 
 def createModel(configurations, modelID):
     if configurations['model-type'] == "XGBoost":
@@ -142,6 +151,7 @@ def createModel(configurations, modelID):
         default_model = xgb.XGBRegressor()
     if configurations['model-type'] == "LinearRegression":
         model = LinearRegression()
+        default_model = LinearRegression()
     if configurations['model-type'] == "RandomForest":
         model = RandomForestRegressor(max_depth=configurations['max-depth'], n_estimators = configurations['n-estimators'])
         default_model = RandomForestRegressor()
@@ -161,7 +171,7 @@ def createModel(configurations, modelID):
     
     # Save model to local file
     try:
-        pickle.dump(trained_model, open('/home/emil/KTH/year2/MVK/MVK-GL/back-end/ml/trained_models/' + str(modelID), 'wb'))
+        pickle.dump(trained_model, open('/home/emil_gunnbergquerat/MVK-GL/back-end/ml/trained_models/' + str(modelID), 'wb'))
     except FileNotFoundError as error:
         raise FileNotFoundError(error)
         
@@ -171,6 +181,11 @@ def createModel(configurations, modelID):
 
 # Only for testing
 if __name__== '__main__':
+<<<<<<< HEAD
     testCrossVal(configurations)
     tetsModel(configurations)
     
+=======
+    createModel(configurations, "2")
+    
+>>>>>>> 7d2b28329b84e61170a55da6f3b12eabc2880711
