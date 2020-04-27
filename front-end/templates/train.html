@@ -171,66 +171,71 @@
     </div>
     <!-- Display slider values -->
     <script>
-        var slider = document.getElementById("myRange");
-        var slider2 = document.getElementById("myRange2");
-        var slider3 = document.getElementById("myRange3");
-        var slider4 = document.getElementById("myRange4");
-        var slider5 = document.getElementById("myRange5");
-        var slider6 = document.getElementById("myRange6");
-        var slider7 = document.getElementById("myRange7");
-        var slider8 = document.getElementById("myRange8");
-        var slider9 = document.getElementById("myRange9");
-        var slider10 = document.getElementById("myRange10");
-        var slider11 = document.getElementById("myRange11");
-        var output = document.getElementById("demo");
-        var output2 = document.getElementById("demo2");
-        var output3 = document.getElementById("demo3");
-        var output4 = document.getElementById("demo4");
-        var output5 = document.getElementById("demo5");
-        var output6 = document.getElementById("demo6");
-        var output7 = document.getElementById("demo7");
-        var output8 = document.getElementById("demo8");
-        var output9 = document.getElementById("demo9");
-        var output10 = document.getElementById("demo10");
-        var output11 =document.getElementById("demo11")
+        var slider = document.getElementById("myRange"); // Slider for XGB Learningrate
+        var slider2 = document.getElementById("myRange2"); //Slider for XGB Maxdepth
+        var slider3 = document.getElementById("myRange3"); // XGB Trainsplit
+        var slider4 = document.getElementById("myRange4"); // XGB Valsplit
+        var slider5 = document.getElementById("myRange5"); //RF N estimators
+        var slider6 = document.getElementById("myRange6"); //RF Max depth
+        var slider7 = document.getElementById("myRange7"); //SVR Trainsplit
+        var slider8 = document.getElementById("myRange8"); //SVR Valsplit
+        var slider9 = document.getElementById("myRange9"); //RF Trainsplit
+        var slider10 = document.getElementById("myRange10"); //RF Valsplit
+        var slider11 = document.getElementById("myRange11"); // SVR C
+        var output = document.getElementById("demo"); // XGB learnrate
+        var output2 = document.getElementById("demo2"); //XGB maxdepth
+        var output3 = document.getElementById("demo3"); // XGB trainsplit
+        var output4 = document.getElementById("demo4"); //XGB Valsplit
+        var output5 = document.getElementById("demo5"); //RF N estimator
+        var output6 = document.getElementById("demo6"); // RF Max depth
+        var output7 = document.getElementById("demo7"); // SVR Trainsplit
+        var output8 = document.getElementById("demo8"); // SVR Valsplit
+        var output9 = document.getElementById("demo9"); // RF Trainsplit
+        var output10 = document.getElementById("demo10"); //RF Valsplit
+        var output11 = document.getElementById("demo11"); // SVR C
 
-        output.innerHTML = slider.value;
-        output2.innerHTML = slider2.value;
-        output3.innerHTML = slider3.value;
-        output4.innerHTML = slider4.value;
-        output5.innerHTML = slider5.value;
-        output6.innerHTML = slider6.value;
-        output7.innerHTML = slider7.value;
-        output9.innerHTML = slider9.value;
-        output11.innerHTML = slider11.value;
-        slider.oninput = function() {
+        output.innerHTML = slider.value; // XGB learn rate
+        output2.innerHTML = slider2.value; //XGB maxdepth
+        output3.innerHTML = slider3.value; //XGB trainsplit
+        output4.innerHTML = slider4.value; // XGB Valsplit
+        output5.innerHTML = slider5.value; //RF N estimator
+        output6.innerHTML = slider6.value; //RF Max Depth
+        output7.innerHTML = slider7.value; //SVR Trainsplit
+        output9.innerHTML = slider9.value; //SVR Valsplit
+        output11.innerHTML = slider11.value; // SVR C
+        slider.oninput = function() { //XGB Learningrate
           output.innerHTML = this.value/10;
         }
-        slider2.oninput = function() {
+        slider2.oninput = function() { // XGB Maxdepth
           output2.innerHTML = this.value;
         }
-        slider3.oninput = function() {
+        slider3.oninput = function() { //XGB trainsplit & Valsplit
           output3.innerHTML = this.value;
           output4.innerHTML = (100 - this.value);
         }
-        slider5.oninput = function() {
+        slider5.oninput = function() { //RF N estimator
           output5.innerHTML = this.value;
         }
-        slider6.oninput = function() {
+        slider6.oninput = function() { // RF Max depth
           output6.innerHTML = this.value;
         }
-        slider7.oninput = function() {
+        slider7.oninput = function() { // SVR Trainsplit and Valsplit
           output7.innerHTML = this.value;
           output8.innerHTML = (100 - this.value);
         }
-        slider9.oninput = function() {
+        slider9.oninput = function() { //RF Trainsplit and Valsplit
           output9.innerHTML = this.value;
           output10.innerHTML = (100 - this.value);
         }
-        slider11.oninput=function(){
+        slider11.oninput=function(){ //SVR C
           output11.innerHTML=this.value;
         }
 
+        /**
+        This func returns the user submitted values and makes sure the values that they choose are stored
+        as to ensure we can print them out back to the User to show what values they've chosen.
+        XGBoost arguments
+        */
         function getValuesXGB() {
           var XGBLR = document.getElementById("myRange");//get XGB Learningrate value
           var XGBMD = document.getElementById("myRange2"); //XGB Max depth value
@@ -244,6 +249,12 @@
           document.getElementById("XGBTrainSplit").innerHTML = XGBTrainSplit;
           document.getElementById("XGBValidationSplit").innerHTML =XGBValidationSplit;
         }
+
+        /**
+        This func returns the user submitted values and makes sure the values that they choose are stored
+        as to ensure we can print them out back to the User to show what values they've chosen.
+        SVR arguments
+        */
         function getValuesSVR() {
           var SVRC = document.getElementById("myRange11"); // Get SVR C value
           var SVRTS = document.getElementById("myRange7"); // Get SVR Trainsplit Value
@@ -256,10 +267,15 @@
           document.getElementById("SVRValidationSplit").innerHTML = SVRValidationSplit;
         }
 
+        /**
+        This func returns the user submitted values and makes sure the values that they choose are stored
+        as to ensure we can print them out back to the User to show what values they've chosen.
+        Random Forest arguments.
+        */
         function getValuesRF(){
-          var RFN = document.getElementById("myRange5");
-          var RFMD = document.getElementById("myRange6");
-          var RFTS = document.getElementById("myRange9");
+          var RFN = document.getElementById("myRange5"); // Get RF n estimators
+          var RFMD = document.getElementById("myRange6"); // Get RF MaxDepth
+          var RFTS = document.getElementById("myRange9"); //Get RF Trainsplit
           RFNestimators = (RFN.value);
           RFMaxDepth = (RFMD.value);
           RFTrainSplit = (RFTS.value);
@@ -270,6 +286,10 @@
           document.getElementById("RFValidationSplit").innerHTML = RFValidationSplit;
         }
 
+        /**
+        Returns the model name that the user enters. Need 3 different ID's as to
+        enable printing them more than once. Also needed one per model type.
+        */
         function getModelName(){
           var MN = document.getElementById("modelname"); //Get the model name
           XGBModelName = (MN.value);
@@ -279,9 +299,6 @@
           document.getElementById("RFModelName").innerHTML = RFModelName;
           document.getElementById("SVRModelName").innerHTML = SVRModelName;
         }
-        // slider4.oninput = function() {
-        //   output4.innerHTML = this.value/10;
-        // }
         $('#modeltype').change(function(){
         selection = $(this).val();
         switch(selection)
