@@ -146,7 +146,6 @@ def predictModel(modelID):
 
 def createModel(configurations, modelID):
     
-   
     dataset = getData('data')
     # Split data
     X = dataset.iloc[:,1:6]
