@@ -52,7 +52,7 @@
                             </div>
                             <!-- SVR VALS -->
                             <div id = "SVR" class="form-group" style = "display:none;" onchange="getValuesSVR();">
-                              <br><p> <b>Select an option</b> </p>
+                              <br><p> <b>Select a Kernel</b> </p>
                               <select name = "SVR KERNEL" id = "KERNEL">
                                 <option value = "linear" selected>linear</option>
                                 <option value = "poly">poly</option>
@@ -81,6 +81,7 @@
                                 <hr><p><h3>Your selected values for this model are:</h3><br>
                                 <li>Model Name: <span id="SVRModelName"> </span></li>
                                 <li>Model Type: SVR</li>
+                                <li>Kernel: <span id ="SVRChoice"> </span></li>
                                 <li>C Value: <span id="SVRCvalue"></span> </li>
                                 <li>Trainsplit: <span id ="SVRTrainSplit"> </span></li>
                                 <li>Valsplit: <span id ="SVRValidationSplit"> </span></li>
@@ -258,10 +259,13 @@
         function getValuesSVR() {
           var SVRC = document.getElementById("myRange11"); // Get SVR C value
           var SVRTS = document.getElementById("myRange7"); // Get SVR Trainsplit Value
+          var SVR = document.getElementById("KERNEL");
+          SVRChoice = (SVR.value);
           SVRCvalue = (SVRC.value);
           SVRTrainSplit = (SVRTS.value);
           console.log(SVRTrainSplit);
           SVRValidationSplit = (100-(SVRTS.value));
+          document.getElementById("SVRChoice").innerHTML = SVRChoice;
           document.getElementById("SVRCvalue").innerHTML = SVRCvalue;
           document.getElementById("SVRTrainSplit").innerHTML = SVRTrainSplit;
           document.getElementById("SVRValidationSplit").innerHTML = SVRValidationSplit;
