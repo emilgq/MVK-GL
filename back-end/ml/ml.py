@@ -27,14 +27,12 @@ configurations = {
 # Beta-version
 # If we use randomsearch we will need to have more values.
 # Not all of the hyperparametrs are used, maybe add more later. 
-def testCrossVal(configurations):
-    dataset = getData('data')
-    X = dataset.iloc[:,1:6]
-    y = dataset.iloc[:,7]
-    X_train, X_test, y_train, y_test = train_test_split(X, y,test_size=configurations['validation-split'], random_state=123 )
+def hyperTuneModel(modelType, X_train, X_test, y_train, y_test):
+    # dataset = getData('data')
+    # X = dataset.iloc[:,1:6]
+    # y = dataset.iloc[:,7]
+    # X_train, X_test, y_train, y_test = train_test_split(X, y,test_size=configurations['validation-split'], random_state=123 )
     kFold = KFold(n_splits=3, shuffle=True, random_state=13)
-
-    modeltype = configurations['model-type']
 
     # Need to optimize to find the best intervall of parameters.
     if modeltype == "RandomForest":
@@ -97,6 +95,7 @@ def testCrossVal(configurations):
     print(model_random.best_params_)
 
     print("RMSE with gridsearch: " + str(evaluate_model(X_test, y_test, grid.best_estimator_)))
+    #return model
 
    
 def tetsModel(configurations):
@@ -146,25 +145,30 @@ def predictModel(modelID):
     return response
 
 def createModel(configurations, modelID):
-    if configurations['model-type'] == "XGBoost":
-        model = xgb.XGBRegressor(learning_rate = configurations['learning-rate'], max_depth = configurations['max-depth'])
-        default_model = xgb.XGBRegressor()
-    if configurations['model-type'] == "LinearRegression":
-        model = LinearRegression()
-        default_model = LinearRegression()
-    if configurations['model-type'] == "RandomForest":
-        model = RandomForestRegressor(max_depth=configurations['max-depth'], n_estimators = configurations['n-estimators'])
-        default_model = RandomForestRegressor()
-    if configurations['model-type'] == "SVR":
-        model = svm.SVR(kernel = configurations['kernel'], C = configurations['c'])
-        default_model = svm.SVR()
+    
    
     dataset = getData('data')
     # Split data
     X = dataset.iloc[:,1:6]
     y = dataset.iloc[:,7]
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=configurations['validation-split'], random_state=123)
-    
+
+    if configurations['hyper-tune'] == True:
+        model = hyperTuneModel(configurations['model-type'], X_train,X_test, y_train, y_test)
+    else
+        if configurations['model-type'] == "XGBoost":
+            model = xgb.XGBRegressor(learning_rate = configurations['learning-rate'], max_depth = configurations['max-depth'])
+            default_model = xgb.XGBRegressor()
+        if configurations['model-type'] == "LinearRegression":
+            model = LinearRegression()
+            default_model = LinearRegression()
+        if configurations['model-type'] == "RandomForest":
+            model = RandomForestRegressor(max_depth=configurations['max-depth'], n_estimators = configurations['n-estimators'])
+            default_model = RandomForestRegressor()
+        if configurations['model-type'] == "SVR":
+            model = svm.SVR(kernel = configurations['kernel'], C = configurations['c'])
+            default_model = svm.SVR()
+
     # Train model
     trained_model = fit_model(model, default_model, X_train, y_train)
     model_rmse = evaluate_model(X_test, y_test, trained_model)
@@ -181,11 +185,6 @@ def createModel(configurations, modelID):
 
 # Only for testing
 if __name__== '__main__':
-<<<<<<< HEAD
     testCrossVal(configurations)
     tetsModel(configurations)
     
-=======
-    createModel(configurations, "2")
-    
->>>>>>> 7d2b28329b84e61170a55da6f3b12eabc2880711
