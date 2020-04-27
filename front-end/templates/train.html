@@ -9,7 +9,7 @@
                     <div id="login-box" class="col-md-12">
                         <form id="login-form" class="form" action="" method="post">
                             <h3 class="text-center text-info">Configure Model</h3><p class="text-info"> <i>In order to train a new model, please fill in the below form.</i></p>
-                            <div class="form-group">
+                            <div class="form-group" onchange = getModelName();>
                                 <label for="modelname"><b>Model Name: </b></label><br>
                                 <input type="text" name="modelname" id="modelname" class="form-control">
                             </div>
@@ -21,12 +21,8 @@
                                 <option value = "XGBoost">XGBoost</option>
                                 <option value = "SVR">SVR</option>
                             </select>
-           <!-- <div id = "cardioyes" style = "display:none;">
-           <label for="How Long?">How Long?</label><br>
-           <input type = "text" name = "duration" />
-           </div> -->
            <!-- XBG VALUES -->
-                            <div id = "XGB" class="form-group" style = "display:none;">
+                            <div id = "XGB" class="form-group" style = "display:none;" onchange="getValuesXGB();">
                                 <label for="learningrate"><b> Learning Rate: </b></label><br>
                                 <input type="range" min="0" max="10" value="0" class="slider" id="myRange" name = "learningrateXG">
                                 <p><i>Value:</i> <span id="demo"></span></p>
@@ -44,12 +40,18 @@
                                 <label for="valsplit" class="form-group"><b>Validation Split: </b></label><br>
                                 <input type="hidden" min="0" max="100" value="0" class="slider" id="myRange4" name = "valsplitXG">
                                 <p> <span id="demo4"></span></p><hr>
-                                <p><h3>Your selected values for this model are:</h3><br><li>Model Name:</li> <li>Model Type: XGBoost</li><li>Learning Rate:<span id="demo"></span> </li>
-                                <li>Max Depth:</li><li>Trainsplit:</li><li>Valsplit:</li><br>Press the "Train Model" button below to proceed with training.<hr>
+                                <p id ="test"><h3>Your selected values for this model are:</h3><br>
+                                <li>Model Name:<span id="XGBModelName"> </span></li>
+                                <li>Model Type: XGBoost</li>
+                                <li>Learning Rate: <span id="XBGLearningRateValue"></span></li>
+                                <li>Max Depth: <span id="XGBmaxDepth"></span></li>
+                                <li>Trainsplit: <span id ="XGBTrainSplit"> </span></li>
+                                <li>Valsplit: <span id = "XGBValidationSplit"> </span></li>
+                                <br>Press the "Train Model" button below to proceed with training.<hr>
                                 </p>
                             </div>
                             <!-- SVR VALS -->
-                            <div id = "SVR" class="form-group" style = "display:none;">
+                            <div id = "SVR" class="form-group" style = "display:none;" onchange="getValuesSVR();">
                               <br><p> <b>Select an option</b> </p>
                               <select name = "SVR KERNEL" id = "KERNEL">
                                 <option value = "linear" selected>linear</option>
@@ -76,9 +78,13 @@
                                 <label for="valsplit" class="form-group"><b>Validation Split:</b></label><br>
                                 <input type="hidden" min="0" max="100" value="0" class="slider" id="myRange8" name = "valsplitSVR">
                                 <p><i>Value: </i><span id="demo8"></span></p>
-                                <hr><p><h3>Your selected values for this model are:</h3><br><li>Model Name:</li> <li>Model Type: SVR</li><li>Learning Rate:<span id="demo"></span> </li>
-                                <li>Max Depth:</li><li>Trainsplit:</li><li>Valsplit:</li><br>Press the "Train Model" button below to proceed with training.<hr>
-                                </p>
+                                <hr><p><h3>Your selected values for this model are:</h3><br>
+                                <li>Model Name: <span id="SVRModelName"> </span></li>
+                                <li>Model Type: SVR</li>
+                                <li>C Value: <span id="SVRCvalue"></span> </li>
+                                <li>Trainsplit: <span id ="SVRTrainSplit"> </span></li>
+                                <li>Valsplit: <span id ="SVRValidationSplit"> </span></li>
+                                <br>Press the "Train Model" button below to proceed with training.<hr></p>
                                 <!-- <label for="trainsplit" class="form-group">Train Split:</label><br>
                                 <input type="range" min="0" max="100" value="0" class="slider" id="myRange3" name ="trainsplitXG">
                                 <p>Value: <span id="demo3"></span></p>
@@ -103,7 +109,7 @@
                                 <p> <span id="demo4"></span></p>
                             </div> -->
                               <!-- RF VALUES -->
-                            <div id = "RF" class ="form-group" style = "display:none;"><br>
+                            <div id = "RF" class ="form-group" style = "display:none;" onchange="getValuesRF();"><br>
                                 <label for="n-estimators"><b>Select a value for the amount of n-estimators:</b></label><br>
                                 <input type="number" min="0" value="0" class="slider" id="myRange5" name = "n-estimatorRF">
                                 <p><i>Value: </i><span id="demo5"></span></p>
@@ -116,8 +122,14 @@
                                 <label for="valsplit" class="form-group"><b>Validation Split:</b></label><br>
                                 <input type="hidden" min="0" max="100" value="0" class="slider" id="myRange10" name = "valsplitRF">
                                 <p><i>Value: </i><span id="demo10"></span></p>
-                                <hr><p><h3>Your selected values for this model are:</h3><br><li>Model Name:</li> <li>Model Type: Random Forest</li><li>Learning Rate:<span id="demo"></span> </li>
-                                <li>Max Depth:</li><li>Trainsplit:</li><li>Valsplit:</li><br>Press the "Train Model" button below to proceed with training.<hr>
+                                <hr><p><h3>Your selected values for this model are:</h3><br>
+                                <li>Model Name: <span id="RFModelName"> </span></li>
+                                <li>Model Type: Random Forest</li>
+                                <li>N-estimators: <span id="RFNestimators"> </span> </li>
+                                <li>Max Depth: <span id="RFMaxDepth"> </span></li>
+                                <li>Trainsplit: <span id ="RFTrainSplit"> </span></li>
+                                <li>Valsplit: <span id ="RFValidationSplit"> </span></li>
+                                <br>Press the "Train Model" button below to proceed with training.<hr>
                                 </p>
                             </div>
                             </div>
@@ -202,7 +214,7 @@
           output4.innerHTML = (100 - this.value);
         }
         slider5.oninput = function() {
-          output5.innerHTML = this.value/10;
+          output5.innerHTML = this.value;
         }
         slider6.oninput = function() {
           output6.innerHTML = this.value;
@@ -217,6 +229,55 @@
         }
         slider11.oninput=function(){
           output11.innerHTML=this.value;
+        }
+
+        function getValuesXGB() {
+          var XGBLR = document.getElementById("myRange");//get XGB Learningrate value
+          var XGBMD = document.getElementById("myRange2"); //XGB Max depth value
+          var XGTS = document.getElementById("myRange3"); //XGB Trainsplit value
+          XBGLearningRateValue = (XGBLR.value)/10;
+          XGBmaxDepth = (XGBMD.value);
+          XGBTrainSplit = (XGTS.value);
+          XGBValidationSplit =(100-(XGTS.value));
+          document.getElementById("XBGLearningRateValue").innerHTML = XBGLearningRateValue;
+          document.getElementById("XGBmaxDepth").innerHTML = XGBmaxDepth;
+          document.getElementById("XGBTrainSplit").innerHTML = XGBTrainSplit;
+          document.getElementById("XGBValidationSplit").innerHTML =XGBValidationSplit;
+        }
+        function getValuesSVR() {
+          var SVRC = document.getElementById("myRange11"); // Get SVR C value
+          var SVRTS = document.getElementById("myRange7"); // Get SVR Trainsplit Value
+          SVRCvalue = (SVRC.value);
+          SVRTrainSplit = (SVRTS.value);
+          console.log(SVRTrainSplit);
+          SVRValidationSplit = (100-(SVRTS.value));
+          document.getElementById("SVRCvalue").innerHTML = SVRCvalue;
+          document.getElementById("SVRTrainSplit").innerHTML = SVRTrainSplit;
+          document.getElementById("SVRValidationSplit").innerHTML = SVRValidationSplit;
+        }
+
+        function getValuesRF(){
+          var RFN = document.getElementById("myRange5");
+          var RFMD = document.getElementById("myRange6");
+          var RFTS = document.getElementById("myRange9");
+          RFNestimators = (RFN.value);
+          RFMaxDepth = (RFMD.value);
+          RFTrainSplit = (RFTS.value);
+          RFValidationSplit = (100-(RFTS.value));
+          document.getElementById("RFNestimators").innerHTML = RFNestimators;
+          document.getElementById("RFMaxDepth").innerHTML = RFMaxDepth;
+          document.getElementById("RFTrainSplit").innerHTML = RFTrainSplit;
+          document.getElementById("RFValidationSplit").innerHTML = RFValidationSplit;
+        }
+
+        function getModelName(){
+          var MN = document.getElementById("modelname"); //Get the model name
+          XGBModelName = (MN.value);
+          RFModelName = (MN.value);
+          SVRModelName = (MN.value);
+          document.getElementById("XGBModelName").innerHTML = XGBModelName;
+          document.getElementById("RFModelName").innerHTML = RFModelName;
+          document.getElementById("SVRModelName").innerHTML = SVRModelName;
         }
         // slider4.oninput = function() {
         //   output4.innerHTML = this.value/10;
