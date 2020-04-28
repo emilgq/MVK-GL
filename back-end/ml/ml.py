@@ -49,8 +49,7 @@ def predictModel(modelID):
     prediction = loaded_model.predict(X)
 
     # Zip hours with prediction
-    response = dict(zip(list(hours), list(prediction)))
-    return response
+    return list(hours), list(map(str, list(prediction)))  
 
 def createModel(configurations, modelID):
     if configurations['model-type'] == "XGBoost":
