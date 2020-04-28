@@ -85,8 +85,8 @@ def create_new_model(model_id, configurations):
 # Model load prediction
 def predict_model(model_id):
   print('Predicting load for model with id: ' + model_id)
-  load = predictModel(model_id)
-  return load
+  hours, load = predictModel(model_id)
+  return hours, load
 
 
 # API Resource for fetching model specific results
@@ -106,7 +106,7 @@ def modelresult(model_id):
     # Compile response object with headers and tuple content
     response = dict(zip(cols, result[0]))
     # Add result column
-    response['result'] = str(predict_model(model_id))
+    response['hours'], response['load'] = predict_model(model_id)
     return json.dumps(response), 200
 
   # Remove model
