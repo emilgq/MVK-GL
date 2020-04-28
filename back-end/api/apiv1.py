@@ -169,7 +169,7 @@ def modelresult(model_id):
       if args['API-KEY'] != APIKEY:
         abort(Response('Unauthorized', 400))
       # Run celery process of deleting model
-      delete_model.delay(model_id)
+      delete_model(model_id)
       return Response(json.dumps({"message": "Succesfully deleted model with id: {}".format(model_id)}), 200)
     except Exception as e:
       abort(Response('Error: {}'.format(e), 400))
