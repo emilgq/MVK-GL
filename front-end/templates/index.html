@@ -7,7 +7,7 @@
 </head>
 
 <body>
-  <h1 class="text-center text-info"> GreenLytics API placeholder graph </h1>
+  <h1 class="text-center text-info"> GreenLytics API prediction  </h1>
 
   <a href="http://127.0.0.1:5000/project"><button style="border-radius:10px;" class="btn btn-info btn-md">
       Go back to Resource management
@@ -23,7 +23,7 @@
   <script>
     const model = '{{ model_id }}';
     const url = 'http://35.228.239.24/api/v1/project/'.concat(model);
-    console.log(model);
+    console.log(model + " this is the model id that you're currently plotting");
 
     chartNow();
     async function chartNow() {
@@ -66,13 +66,16 @@
       const ys = [];
       const response = await fetch(url);
       const data = await response.json();
-      console.log(data);
+      console.log("this is the retrieved data" + data);
       const result = data.result;
-      console.log(result);
+      console.log("this is the result" + result);
+      // const test = data.configurations;
+      // console.log(test + "hej");
+      // const xAxisTemp =
       const yAxis = Object.values(result);
       const xAxis = Object.keys(result);
-      console.log(xAxis);
-      console.log(yAxis);
+      console.log("X-Axis values:" + xAxis + "here are values of time. 0-24.");
+      console.log("Y-Axis values: " + yAxis + "here are values on the y-axis");
       for (var i = 0; i < 24; i ++){
         xs.push(xAxis[i]);
       }
@@ -80,6 +83,8 @@
       for(var i = 0; i < 24; i++){
         ys.push(yAxis[i]);
       }
+      console.log(xs + "hello this is supposed to be vals on x-axis");
+      console.log(ys + "hello this is supposed to be vals on y-axis");
       return {
         xs,
         ys
