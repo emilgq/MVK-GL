@@ -122,8 +122,23 @@ def createModel(configurations, modelID):
     y = dataset.iloc[:,7]
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=configurations['validation-split'], random_state=123)
 
+    # Hyper-tuned model
     if configurations['hyper-tune'] == "True":
         trained_model = hyperTuneModel(configurations['model-type'], X_train,X_test, y_train, y_test)
+
+    # Default model
+    elif configurations['default'] == "True:"
+        if configurations['model-type'] == "XGBoost":
+            default_model = xgb.XGBRegressor()
+        if configurations['model-type'] == "LinearRegression":
+            default_model = LinearRegression()
+        if configurations['model-type'] == "RandomForest":
+            default_model = RandomForestRegressor()
+        if configurations['model-type'] == "SVR":
+            default_model = svm.SVR()
+        trained_model = fit_model(default_model, default_model, X_train, y_train)
+
+    # Customized model
     else:
         if configurations['model-type'] == "XGBoost":
             model = xgb.XGBRegressor(learning_rate = configurations['learning-rate'], max_depth = configurations['max-depth'])
@@ -137,10 +152,8 @@ def createModel(configurations, modelID):
         if configurations['model-type'] == "SVR":
             model = svm.SVR(kernel = configurations['kernel'], C = configurations['c'])
             default_model = svm.SVR()
-        if configurations['default'] == 'True':
-            trained_model = fit_model(default_model, default_model, X_train, y_train)
-        else:
-            trained_model = fit_model(model, default_model, X_train, y_train)
+        
+        trained_model = fit_model(model, default_model, X_train, y_train)
 
 
     model_rmse = evaluate_model(X_test, y_test, trained_model)
