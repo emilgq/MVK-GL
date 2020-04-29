@@ -19,7 +19,7 @@ configurations = {
     "n-estimators": 100,
     "kernel": 'poly',
     "c": 10,
-    "model-type": 'XGBoost',
+    "model-type": 'SVR',
     "train-split": 0.80,
     "validation-split": 0.20   
 }
@@ -28,14 +28,10 @@ configurations = {
 # If we use randomsearch we will need to have more values.
 # Not all of the hyperparametrs are used, maybe add more later. 
 def hyperTuneModel(modelType, X_train, X_test, y_train, y_test):
-    # dataset = getData('data')
-    # X = dataset.iloc[:,1:6]
-    # y = dataset.iloc[:,7]
-    # X_train, X_test, y_train, y_test = train_test_split(X, y,test_size=configurations['validation-split'], random_state=123 )
     kFold = KFold(n_splits=3, shuffle=True, random_state=13)
 
     # Need to optimize to find the best intervall of parameters.
-    if modeltype == "RandomForest":
+    if modelType == "RandomForest":
         model = RandomForestRegressor()
         # Set the different values
         n_estimators = [int(x) for x in np.linspace(start = 200, stop = 2000, num = 10)]
@@ -52,7 +48,7 @@ def hyperTuneModel(modelType, X_train, X_test, y_train, y_test):
             'min_samples_split': min_samples_split,
             'min_samples_leaf': min_samples_leaf,
             'bootstrap': bootstrap}
-    if modeltype == "XGBoost":
+    if modelType == "XGBoost":
         #Maybe needs to change depending on random/grid search.
         model = xgb.XGBRegressor()
         learning_rate = [0.05,0.1,0.2,0.25,0.3]
@@ -60,16 +56,16 @@ def hyperTuneModel(modelType, X_train, X_test, y_train, y_test):
         max_depth = [4,6,8,9,10]
         max_depth = [7,8,9]
         min_child_weight = [0.5,2,4,6,8]
-        #colsample_bytree = [0.3,0.4,0.6,0.7]
+        colsample_bytree = [0.3,0.4,0.6,0.7]
 
         random_grid = {
             'learning_rate': learning_rate,
             'min_split_loss': min_split_loss,
             'max_depth': max_depth,
             'min_child_weight': min_child_weight,
-            #'colsample_bytree': colsample_bytree
+            'colsample_bytree': colsample_bytree
         }
-    if modeltype == "SVR":
+    if modelType == "SVR":
         model = svm.SVR()
         kernel = ['poly','rbf','sigmoid']
         C = [0.5,1,1.5,2]
@@ -86,25 +82,12 @@ def hyperTuneModel(modelType, X_train, X_test, y_train, y_test):
     # Randomized search for best hyperparameters
     model_random = RandomizedSearchCV(estimator = model, param_distributions = random_grid, n_iter = 150, cv = kFold, verbose=2, random_state=42, n_jobs = -1)
 
-    # Gridsearch for best hyperparameters
-    grid = GridSearchCV(estimator=model, param_grid= random_grid, cv= kFold, scoring= 'r2' )
-    grid = grid.fit(X_train,y_train)
-
     model_random.fit(X_train, y_train)
     print("RMSE with radnomsearch: " + str(evaluate_model(X_test,y_test, model_random.best_estimator_)))
     print(model_random.best_params_)
 
-    print("RMSE with gridsearch: " + str(evaluate_model(X_test, y_test, grid.best_estimator_)))
-    #return model
+    return model_random.best_estimator_
 
-   
-def tetsModel(configurations):
-    dataset = getData('data')
-    X = dataset.iloc[:,1:6]
-    y = dataset.iloc[:,7]
-    X_train, X_test, y_train, y_test = train_test_split(X, y,test_size=configurations['validation-split'], random_state=123)
-    default_model = xgb.XGBRegressor(learning_rate = configurations['learning-rate'], max_depth = configurations['max-depth'])
-    print("RMSE without ranbomsearch: " + str(evaluate_model(X_test, y_test, default_model.fit(X_train, y_train))))
 
 def getData(type):
     try:
@@ -152,9 +135,9 @@ def createModel(configurations, modelID):
     y = dataset.iloc[:,7]
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=configurations['validation-split'], random_state=123)
 
-    if configurations['hyper-tune'] == True:
-        model = hyperTuneModel(configurations['model-type'], X_train,X_test, y_train, y_test)
-    else
+    if configurations['hyper-tune'] == "True":
+        trained_model = hyperTuneModel(configurations['model-type'], X_train,X_test, y_train, y_test)
+    else:
         if configurations['model-type'] == "XGBoost":
             model = xgb.XGBRegressor(learning_rate = configurations['learning-rate'], max_depth = configurations['max-depth'])
             default_model = xgb.XGBRegressor()
@@ -167,9 +150,12 @@ def createModel(configurations, modelID):
         if configurations['model-type'] == "SVR":
             model = svm.SVR(kernel = configurations['kernel'], C = configurations['c'])
             default_model = svm.SVR()
+        if configurations['default'] == 'True':
+            trained_model = fit_model(default_model, default_model, X_train, y_train)
+        else:
+            trained_model = fit_model(model, default_model, X_train, y_train)
 
-    # Train model
-    trained_model = fit_model(model, default_model, X_train, y_train)
+
     model_rmse = evaluate_model(X_test, y_test, trained_model)
     
     # Save model to local file
@@ -184,6 +170,5 @@ def createModel(configurations, modelID):
 
 # Only for testing
 if __name__== '__main__':
-    testCrossVal(configurations)
-    tetsModel(configurations)
+    #hyperTuneModel(configurations)
     
