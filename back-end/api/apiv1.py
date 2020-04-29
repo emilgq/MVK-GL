@@ -208,9 +208,9 @@ def project():
       abort(Response('Model type \"{}\" is not provided in this application. Select \"XGBoost\", \"RandomForest\", \"SVR\", or \"LinearRegression\"'.format(configurations['model-type']),400))
     if (configurations['train-split']+configurations['validation-split'] != 1):
       abort(Response('Split must total to 1',400))
-    if args['hyper-tune'] not in ("True", "False") or args['default'] not in ("True", "False"):
+    if configurations['hyper-tune'] not in ("True", "False") or configurations['default'] not in ("True", "False"):
       abort(Response('Default and Hyper-tune must be True or False'))
-    if args['hyper-tune'] == "True" and args['default'] == "True":
+    if configurations['hyper-tune'] == "True" and configurations['default'] == "True":
       abort(Response('Default and Hyper-tune cannot both be True'))
 
 
