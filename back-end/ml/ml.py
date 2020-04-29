@@ -127,7 +127,7 @@ def createModel(configurations, modelID):
         trained_model = hyperTuneModel(configurations['model-type'], X_train,X_test, y_train, y_test)
 
     # Default model
-    elif configurations['default'] == "True:"
+    elif configurations['default'] == "True":
         if configurations['model-type'] == "XGBoost":
             default_model = xgb.XGBRegressor()
         if configurations['model-type'] == "LinearRegression":
