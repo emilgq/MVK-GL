@@ -12,18 +12,6 @@ from sklearn import svm
 import urllib, json
 from urllib.request import urlopen
 
-
-configurations = {
-    "learning-rate": 0.24,
-    "max-depth": 8,
-    "n-estimators": 100,
-    "kernel": 'poly',
-    "c": 10,
-    "model-type": 'SVR',
-    "train-split": 0.80,
-    "validation-split": 0.20   
-}
-
 # Beta-version
 # If we use randomsearch we will need to have more values.
 # Not all of the hyperparametrs are used, maybe add more later. 

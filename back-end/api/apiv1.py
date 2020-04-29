@@ -75,12 +75,18 @@ def runDBQuery(query, parameters):
 # Create model in background process
 @celery.task
 def create_new_model(model_id, configurations):
-  print('Creating new model with conf: ' + str(configurations))
-  rmse = createModel(configurations, model_id)
-  updatequery = "update ml_models set status = 'True', rmse = (%s) where model_id = (%s)"
-  updateParameters = (rmse, model_id,)
-  runDBQuery(updatequery, updateParameters)
-  return True
+  try:  
+    print('Creating new model with conf: ' + str(configurations))
+    rmse = createModel(configurations, model_id)
+    updatequery = "update ml_models set status = 'True', rmse = (%s) where model_id = (%s)"
+    updateParameters = (rmse, model_id,)
+    runDBQuery(updatequery, updateParameters)
+  except Exception as error:
+    updatequery = "update ml_models set status = 'True' where model_id = (%s)"
+    runDBQuery(updatequery, (model_id,))
+    print('Model training failed with error message: {}'.format(error))
+  finally:
+    return True
 
 # Delete model as background process
 def delete_model(model_id):
@@ -202,6 +208,11 @@ def project():
       abort(Response('Model type \"{}\" is not provided in this application. Select \"XGBoost\", \"RandomForest\", \"SVR\", or \"LinearRegression\"'.format(configurations['model-type']),400))
     if (configurations['train-split']+configurations['validation-split'] != 1):
       abort(Response('Split must total to 1',400))
+    if args['hyper-tune'] not in ("True", "False") or args['default'] not in ("True", "False"):
+      abort(Response('Default and Hyper-tune must be True or False'))
+    if args['hyper-tune'] == "True" and args['default'] == "True":
+      abort(Response('Default and Hyper-tune cannot both be True'))
+
 
     # Fetch reference from database
     query = "insert into ml_models (model_name, configurations, owner) values (%s,%s,%s)"
@@ -211,8 +222,8 @@ def project():
       runDBQuery(query, parameters)
       model_id, _ = runDBQuery("select model_id from ml_models order by time_creation desc limit 1", None)
       create_new_model.delay(model_id[0][0], configurations)
-      message = 'successful model creation'
-      return message, 200
+      message = {"msg": 'Model training started', "model-id": model_id}
+      return json.dumps(message), 200
     except Exception as e:
       abort(Response('Invalid argument. Error: {}'.format(e), 400))
 
