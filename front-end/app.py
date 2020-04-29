@@ -145,7 +145,8 @@ def train():
     print(params)
     print("Hello this should get a response")
     response = requests.post(endpoint_url, headers=headers, data=json.dumps(params))
-    return response.text
+    flash("Your model is now in training, please be patient and refresh soon", "success")
 
+    return redirect(url_for("project"))
 if __name__ == "__main__":
     app.run(debug=True)
