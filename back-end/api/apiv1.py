@@ -89,7 +89,7 @@ def delete_model(model_id):
   query = "select status, rmse from ml_models where model_id = %s"
 
   try:
-    (training_completed, rmse) = runDBQuery(query, (model_id,))[0][0][0]
+    (training_completed, rmse) = runDBQuery(query, (model_id,))[0][0]
   except Exception as error:
     raise Exception(error)
 
@@ -116,7 +116,7 @@ def delete_model(model_id):
         print('Model reference deleted from DB')
         # End while loop
         return
-        
+
       # model not found in file system  
       else:
         print('ML Object not found') 
