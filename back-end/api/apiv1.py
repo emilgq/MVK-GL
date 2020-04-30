@@ -86,24 +86,46 @@ def create_new_model(model_id, configurations):
 def delete_model(model_id):
   # Wait for model to complete training before deletion
   # Evaluate if model is ready to be deleted
-  query = "select status from ml_models where model_id = %s"
+  query = "select status, rmse from ml_models where model_id = %s"
 
   try:
-    ready = runDBQuery(query, (model_id,))[0][0][0]
+    (training_completed, rmse) = runDBQuery(query, (model_id,))[0][0][0]
   except Exception as error:
     raise Exception(error)
 
-  if ready is None: 
+  # Query yields no result
+  if training_completed is None: 
     print('Model ID not found')
     return
 
-  if (ready):
-    print('Model {} ready for deletion'.format(model_id))
-    # Delete model from ml/trained_models
-    if os.path.exists("../ml/trained_models/" + model_id):
-      os.remove("../ml/trained_models/" + model_id)
-      print('ML Object deleted')
-
+  # If status is true, model has finished training.
+  if (training_completed):
+    # Succeeded training assigns value to rmse
+    if rmse is not None:
+      print('Model {} ready for deletion'.format(model_id))
+      
+      # Delete model from ml/trained_models
+      if os.path.exists("../ml/trained_models/" + model_id):
+        os.remove("../ml/trained_models/" + model_id)
+        print('ML Object deleted')
+        query = "delete from ml_models where model_id = %s"
+        try: 
+          runDBQuery(query, (model_id,))  
+        except Exception as error:
+          raise Exception(error)
+        print('Model reference deleted from DB')
+        # End while loop
+        return
+        
+      # model not found in file system  
+      else:
+        print('ML Object not found') 
+        raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), os.path.abspath("../ml/trained_models/" + model_id)) 
+    
+    # rmse has no assigned value, implying error while training.
+    # Remove only db reference without cleaning file system
+    else:
+      print('Model had error while training and failed. Deleting DB reference.')
       query = "delete from ml_models where model_id = %s"
       try: 
         runDBQuery(query, (model_id,))  
@@ -112,21 +134,9 @@ def delete_model(model_id):
 
       print('Model reference deleted from DB')
 
-      # End while loop
-      return
-    else:
-      print('ML Object not found') 
-      raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), os.path.abspath("../ml/trained_models/" + model_id)) 
-    
-  # If model has not finished training, there was a bug in training, delete its DB reference
+  # If model has not finished training, do nothing. 
   else:
-    print('Model is not ready, deleting DB Reference')
-    query = "delete from ml_models where model_id = %s"
-    try: 
-      runDBQuery(query, (model_id,))  
-    except Exception as error:
-      raise Exception(error)
-    print('Model reference deleted from DB')
+    print('Model is still training and cannot yet be deleted')
     return
 
 
@@ -169,7 +179,7 @@ def modelresult(model_id):
       if args['API-KEY'] != APIKEY:
         abort(Response('Unauthorized', 400))
       # Run celery process of deleting model
-      delete_model.delay(model_id)
+      delete_model(model_id)
       return Response(json.dumps({"message": "Succesfully deleted model with id: {}".format(model_id)}), 200)
     except Exception as e:
       abort(Response('Error: {}'.format(e), 400))
