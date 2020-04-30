@@ -96,7 +96,7 @@ def delete_model(model_id):
   # Query yields no result
   if training_completed is None: 
     print('Model ID not found')
-    return
+    return 'Model ID not found'
 
   # If status is true, model has finished training.
   if (training_completed):
@@ -115,7 +115,7 @@ def delete_model(model_id):
           raise Exception(error)
         print('Model reference deleted from DB')
         # End while loop
-        return
+        return 'ML Object deleted from file system and model reference deleted from DB'
 
       # model not found in file system  
       else:
@@ -133,11 +133,12 @@ def delete_model(model_id):
         raise Exception(error)
 
       print('Model reference deleted from DB')
+      return 'Model reference deleted from DB'
 
   # If model has not finished training, do nothing. 
   else:
     print('Model is still training and cannot yet be deleted')
-    return
+    return 'Model is still training and cannot yet be deleted'
 
 
   
@@ -179,8 +180,8 @@ def modelresult(model_id):
       if args['API-KEY'] != APIKEY:
         abort(Response('Unauthorized', 400))
       # Run celery process of deleting model
-      delete_model(model_id)
-      return Response(json.dumps({"message": "Succesfully deleted model with id: {}".format(model_id)}), 200)
+      delete_response = delete_model(model_id)
+      return Response(json.dumps({"message": delete_response, "model_id": model_id}), 200)
     except Exception as e:
       abort(Response('Error: {}'.format(e), 400))
 
