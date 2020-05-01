@@ -13,6 +13,18 @@
                                 <label for="modelname"><b>Model Name: </b></label><br>
                                 <input type="text" name="modelname" id="modelname" class="form-control">
                             </div>
+
+
+
+                            <div class="form-group"><b>Choose Model Setting:</b> <br>
+                                                          <select name = "modelsetting" id = "modelsetting">
+                                                            <option value = "Default" selected >Default</option>
+                                                            <option value = "Custom">Custom</option>
+                                                            <option value = "Hypertune">Hypertune</option>
+                                                        </select>
+                                                        <br></br>
+                            </div>
+
                             <div class="form-group"><b>Model Type:</b> <br>
                               <select name = "modeltype" id = "modeltype">
                                 <option value = "Default" selected>Choose one</option>
@@ -162,7 +174,7 @@
                             </div> -->
                             <div class="form-group">
                                 <input type="submit" name="submit" class="btn btn-info btn-md" value="Train model">
-                                <input type="reset" class ="btn btn-info btn-md" value="Reset Model">
+                                <input type="button" class ="btn btn-info btn-md" value="Reset Model" href="/train" onclick="reloadPage();">
                             </div>
                         </form>
                     </div>
@@ -172,6 +184,10 @@
     </div>
     <!-- Display slider values -->
     <script>
+        function reloadPage(){
+          location.reload();
+        }
+
         var slider = document.getElementById("myRange"); // Slider for XGB Learningrate
         var slider2 = document.getElementById("myRange2"); //Slider for XGB Maxdepth
         var slider3 = document.getElementById("myRange3"); // XGB Trainsplit
@@ -303,40 +319,69 @@
           document.getElementById("RFModelName").innerHTML = RFModelName;
           document.getElementById("SVRModelName").innerHTML = SVRModelName;
         }
-        $('#modeltype').change(function(){
+
+        // function getBooleans(){
+        //   var default = document.getElementById("default");
+        //   var hyperTune = document.getElementById("hypertune");
+        //   var custom = document.getElementById("custom");
+        //
+        //   if ()
+        //
+        // }
+
+        $('#modelsetting').change(function(){
         selection = $(this).val();
         switch(selection)
         {
-            //show the <div> or not
-            case 'Linear Regression':
-                $('#LR').show();
-                $('#XGB').hide();
-                $('#RF').hide();
-                $('#SVR').hide();
-                break;
-            case 'XGBoost':
-                $('#XGB').show();
-                $('#RF').hide();
-                $('#LR').hide();
-                $('#SVR').hide();
-                break;
-            case 'RandomForest':
-                $('#RF').show();
-                $('#XGB').hide();
-                $('#LR').hide();
-                $('#SVR').hide();
-                break;
             case 'Default':
+                $('#XGB').hide();
+                $('#RF').hide();
+                $('#LR').hide();
+                $('#SVR').hide();
+                break;
+            case 'Custom':
+              $('#modeltype').change(function(){
+                selection = $(this).val();
+                switch(selection)
+                {
+                    case 'XGBoost':
+                        $('#XGB').show();
+                        $('#RF').hide();
+                        $('#LR').hide();
+                        $('#SVR').hide();
+                        break;
+                    case 'RandomForest':
+                        $('#RF').show();
+                        $('#XGB').hide();
+                        $('#LR').hide();
+                        $('#SVR').hide();
+                        break;
+                    case 'Default':
+                        $('#RF').hide();
+                        $('#XGB').hide();
+                        $('#LR').hide();
+                        $('#SVR').hide();
+                        break;
+                    case 'SVR':
+                        $('#RF').hide();
+                        $('#XGB').hide();
+                        $('#LR').hide();
+                        $('#SVR').show();
+                        break;
+                    default:
+                        $('#RF').hide();
+                        $('#XGB').hide();
+                        $('#LR').hide();
+                        $('#SVR').hide();
+                        break;
+                }
+              });
+                break;
+            case 'Hypertune':
                 $('#RF').hide();
                 $('#XGB').hide();
                 $('#LR').hide();
                 $('#SVR').hide();
-                break;
-            case 'SVR':
-                $('#RF').hide();
-                $('#XGB').hide();
-                $('#LR').hide();
-                $('#SVR').show();
                 break;
             default:
                 $('#RF').hide();
