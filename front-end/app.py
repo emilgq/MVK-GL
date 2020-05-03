@@ -54,10 +54,14 @@ def logout():
       return redirect(url_for("login"))
 
 
-@app.route('/project', methods =['POST'])
+@app.route('/project', methods =['GET', 'POST'])
 @is_logged_in
 def project():
-  return render_template('project.html')
+    if request.method == 'GET':
+        return render_template('project.html')
+  # if request.method == 'POST':
+  #   endpoint_url = "http://35.228.239.24/api/v1/project/" #Should get the ID of the model to be deleted.
+  #   headers = {"Content-Type" : "application/json"}
 
 @app.route('/project/<model_id>')
 @is_logged_in
