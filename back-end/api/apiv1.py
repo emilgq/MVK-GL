@@ -364,16 +364,15 @@ def weatherData():
 # API resource for fetching the predicted load for the the upcoming 24h
 @app.route('api/v1/benchmark', methods=['GET'])
 def benchmark():
-  if request.method == 'GET'
-
-    response['hours'], response['load'] = predict_model(0):
-    response['model-name'] = 'Benchmark'
-    response['model-type'] = 'LinearRegression'
-
-    return json.dumps(response), 200
-
-  except Exception as e:
-    abort(Response('Error: {}'.format(e), 400)))
+  if request.method == 'GET':
+    response = {}
+    try: 
+      response['hours'], response['load'] = predict_model(0)
+      response['model-name'] = 'Benchmark'
+      response['model-type'] = 'LinearRegression'
+      return json.dumps(response), 200
+    except Exception as e:
+      abort(Response('Error: {}'.format(e), 400))
 
 if __name__ == "__main__":
     app.run(debug=True)
