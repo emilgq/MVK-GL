@@ -50,10 +50,15 @@
         },
         options: {
           scales: {
+             display: true,
             yAxes: [{
+              scaleLabel :{
+                display : true,
+                labelString: "Predicted Work Load (MWh)"
+              },
               ticks: {
                 callback: function(value, index, values) {
-                  return "Placeholder text " + value + "";
+                  return value;
                   //beginAtZero : true;
                 }
                   // beginAtZero: true;
