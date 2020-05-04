@@ -42,6 +42,7 @@ cors = CORS(app, resources={r"/api/v1/*": {"origins": "*"}})
 APIKEY = "MVK123"
 testLoadPrediction = [-300000,-290000,-280000,-270000,-290000,-310000,-300000,-310000,-320000,-330000,-340000,-310000,-320000,-290000,-280000,-300000,-310000,-330000,-300000,-280000,-290000,-280000,-270000,-320000]
 testTimes = ['00:00','01:00','02:00','03:00','04:00','05:00','06:00','07:00','08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00', '20:00', '21:00', '22:00', '23:00']
+testLoadBenchmark = [-500,-100,-900,-270,-400,-310,-300,-310,-320,-330,-340,-310,-320,-290,-280,-300,-310,-330,-300,-280,-290,-280,-270,-320]
 
 # Query must be a parametrized SQL Statement - (select * from ml_models where model_name = %s)
 # Paramteres must be a tuple with number of element equal to number of parameters in query. (XGB001)
@@ -73,7 +74,6 @@ def runDBQuery(query, parameters):
     raise Exception(error)
 
 # Create model in background process
-@celery.task
 def create_new_model(model_id, configurations):
   try:  
     print('Creating new model with conf: ' + str(configurations))
@@ -157,7 +157,6 @@ def predict_model(model_id):
   hours, load = predictModel(model_id)
   return hours, load
 
-
 # API Resource for fetching model specific results
 @app.route('/api/v1/project/<model_id>', methods=['GET', 'DELETE'])
 def modelresult(model_id):
@@ -210,13 +209,34 @@ def project():
     return json.dumps(response), 200
 
   if request.method == 'POST':
-  # Create new Machine Learning Model
     args = request.get_json()
     if args['API-KEY'] != APIKEY:
       abort(Response('unauthorized',400))
     configurations = args['configurations']
     if configurations['model-type'] not in ['XGBoost', 'RandomForest', 'SVR', 'LinearRegression']:
       abort(Response('Model type \"{}\" is not provided in this application. Select \"XGBoost\", \"RandomForest\", \"SVR\", or \"LinearRegression\"'.format(configurations['model-type']),400))
+    
+    # Validate learning rate and max depth for XGBoost models
+    if (configurations['model-type'] == 'XGBoost'):
+        if (configurations['learning-rate'] < 0 || configurations['learning-rate'] > 1):
+            abort(Response('Lerning rate must be a number from 0 to 1',400))
+        if (configurations['max-depth'] <= 0):
+            abort(Response('Max depth must be a positive number larger than 0',400))
+            
+    # Validate n-estimators and max depth for RandomForest models        
+    if (configurations['model-type'] == 'RandomForest'):
+        if (configurations['n-estimators'] <= 0):
+            abort(Response('n-estimator must be a positive number larger than 0',400))
+        if (configurations['max-depth'] <= 0):
+            abort(Response('Max depth must be a positive number larger than 0',400))
+     
+    # Validate kernel and c for SVR models
+    if (configurations['model-type'] == 'SVR'):
+        if configurations['kernel'] not in ['linear', 'poly', 'rbf', 'sigmoid']:
+             abort(Response('Kernel type \"{}\" is not provided in this application. Select \"linear\", \"poly\", \"rbf\", or \"sigmoid\"'.format(configurations['kernel']),400))
+        if (configurations['c'] <= 0):
+            abort(Response('C must be a positive number larger than 0',400)) #Vet inte om denna parameter heter C!!
+            
     if (configurations['train-split']+configurations['validation-split'] != 1):
       abort(Response('Split must total to 1',400))
     if configurations['hyper-tune'] not in ("True", "False") or configurations['default'] not in ("True", "False"):
@@ -224,14 +244,14 @@ def project():
     if configurations['hyper-tune'] == "True" and configurations['default'] == "True":
       abort(Response('Default and Hyper-tune cannot both be True'))
 
-
-    # Fetch reference from database
+    # Create reference in database
     query = "insert into ml_models (model_name, configurations, owner) values (%s,%s,%s)"
     parameters = (args['model-name'], json.dumps(configurations), 1337,)
-    # Embed in try/except
     try:
       runDBQuery(query, parameters)
+      # Get model_id of new model
       model_id, _ = runDBQuery("select model_id from ml_models order by time_creation desc limit 1", None)
+      # Start training as background process
       create_new_model.delay(model_id[0][0], configurations)
       message = {"msg": 'Model training started', "model-id": model_id}
       return json.dumps(message), 200
@@ -341,7 +361,19 @@ def weatherData():
     except Exception as e:
       abort(Response('Error: {}'.format(e), 400))
 
+# API resource for fetching the predicted load for the the upcoming 24h
+@app.route('api/v1/benchmark', methods=['GET'])
+  def benchmark():
+    if request.method == 'GET'
 
+      response['hours'], response['load'] = predict_model(0):
+      response['model-name'] = 'Benchmark'
+      response['model-type'] = 'LinearRegression'
+
+      return json.dumps(response), 200
+
+    except Exception as e:
+      abort(Response('Error: {}'.format(e), 400)))
 
 if __name__ == "__main__":
     app.run(debug=True)
