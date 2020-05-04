@@ -17,6 +17,7 @@
   <script>
     const url = 'http://35.228.239.24/api/v1/project';
 
+    // Här är hur man gör en instans av getData -  massa code duplic i Pelles Kod //Pelle
     async function resourceNow() {
       const data = await getData();
       // TABLE HEADERS.
@@ -60,21 +61,44 @@
         // console.log(rmse);
         // console.log(status);
 
+        // rmse null => cant display.
         if(rmse == null && status == true){
           tabCell.innerHTML ='<text ='.concat('\'/project/', data.ids[i], '\'">Can not display this model due to an error during training</button>')
         }
-        if(rmse != null && status == false){
+        // status false => cant display.
+        if(status == false){
           tabCell.innerHTML ='<text ='.concat('\'/project/', data.ids[i], '\'">Can not display this model due to model is currently under training</button>')
         }
+
+        //Delete button
+        var tabCell2 = tr.insertCell();
+        tabCell2.innerHTML = '<button class ="btn btn-danger" onclick=\"deleteData('.concat(data.ids[i], ')\">Delete</button>');
+        console.log("testlog");
       }
+
 
       // FINALLY ADD THE NEWLY CREATED TABLE WITH JSON DATA TO A CONTAINER.
       const divContainer = document.getElementById("showData");
       divContainer.innerHTML = "";
       divContainer.appendChild(table);
-
       return data;
-    }
+      }
+
+      // Deleteing desired data.
+      async function deleteData(id){
+        console.log('http://35.228.239.24/api/v1/project/'.concat(id) +" Hello this is a test");
+        fetch('http://35.228.239.24/api/v1/project/'.concat(id),
+        {method : 'DELETE',
+        headers: {'Content-Type' : 'application/json'},
+        body: JSON.stringify({"API-KEY":"MVK123"}) });
+        await sleep(500);
+        location.reload();
+        }
+
+        // delay function
+        function sleep(ms){
+          return new Promise(resolve => setTimeout(resolve, ms));
+        }
 
     async function getData() {
       const response = await fetch(url);
