@@ -4,6 +4,7 @@ import psycopg2
 
 # Importing celery to be able to run tasks in the backround
 from celery import Celery
+from celery.exceptions import SoftTimeLimitExceeded
 
 # To enable Cross Origin Requests (such as JS .fetch())
 from flask_cors import CORS
@@ -74,7 +75,7 @@ def runDBQuery(query, parameters):
     raise Exception(error)
 
 # Create model in background process
-@celery.task
+@celery.task(soft_time_limit=4, time_limit=5)
 def create_new_model(model_id, configurations):
   try:  
     print('Creating new model with conf: ' + str(configurations))
@@ -82,7 +83,7 @@ def create_new_model(model_id, configurations):
     updatequery = "update ml_models set status = 'True', rmse = (%s) where model_id = (%s)"
     updateParameters = (rmse, model_id,)
     runDBQuery(updatequery, updateParameters)
-  except Exception as error:
+  except (Exception, SoftTimeLimitExceeded) as error:
     updatequery = "update ml_models set status = 'True' where model_id = (%s)"
     runDBQuery(updatequery, (model_id,))
     print('Model training failed with error message: {}'.format(error))
