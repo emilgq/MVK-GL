@@ -362,7 +362,7 @@ def weatherData():
       abort(Response('Error: {}'.format(e), 400))
 
 # API resource for fetching the predicted load for the the upcoming 24h
-@app.route('api/v1/benchmark', methods=['GET'])
+@app.route('/api/v1/benchmark', methods=['GET'])
 def benchmark():
   if request.method == 'GET':
     response = {}
