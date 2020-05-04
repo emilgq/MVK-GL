@@ -67,13 +67,15 @@
         }
         // status false => cant display.
         if(status == false){
-          tabCell.innerHTML ='<text ='.concat('\'/project/', data.ids[i], '\'">Can not display this model due to model is currently under training</button>')
+          tabCell.innerHTML ='<text ='.concat('\'/project/', data.ids[i], '\'">Can not display nor delete this model due to model is currently under training</button>')
         }
 
         //Delete button
+
         var tabCell2 = tr.insertCell();
+        if(status == true){
         tabCell2.innerHTML = '<button class ="btn btn-danger" onclick=\"deleteData('.concat(data.ids[i], ')\">Delete</button>');
-        console.log("testlog");
+        console.log("testlog");}
       }
 
 
