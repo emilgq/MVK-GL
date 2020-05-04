@@ -5,7 +5,6 @@ import requests, json
 app = Flask(__name__)
 
 app.secret_key = 'MVK123'
-# session['logged_in'] = False
 
 # Authorized wrapper function
 def is_logged_in(f):
@@ -18,7 +17,6 @@ def is_logged_in(f):
               flash("Unauthorized. Please enter you credentials to access this feature.", "danger")
               return redirect(url_for("login"))
       except KeyError:
-          # flash("hello")
           return redirect(url_for("login"))
   return wrap
 
@@ -26,8 +24,6 @@ def is_logged_in(f):
 # https://flask.palletsprojects.com/en/1.1.x/quickstart/#rendering-templates
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-  # if session['logged_in'] == False:
-  #     return redirect(url_for("login"))
   if request.method == 'GET':
     return render_template('login.html')
   if request.method == 'POST':
@@ -41,34 +37,22 @@ def login():
       return render_template('login.html', error=error)
 
 @app.route('/logout')
-# @is_logged_in
 def logout():
     if session['logged_in']:
       session['logged_in'] = False
       flash("You have been logged out.", "success")
       return redirect(url_for("login"))
     else:
-      # session['logged_in'] = False
       error = "Quit messing around with the URL, use the buttons like normal people"
       return render_template('login.html', error=error)
       return redirect(url_for("login"))
 
 
-@app.route('/project', methods =['GET', 'DELETE'])
+@app.route('/project', methods =['GET'])
 @is_logged_in
 def project():
-    # return render_template('project.html')
     if request.method == 'GET':
         return render_template('project.html')
-  # if request.method == 'POST':
-  #   endpoint_url = "http://35.228.239.24/api/v1/project/" #Should get the ID of the model to be deleted.
-  #   headers = {"Content-Type" : "application/json"}
-    if request.method =='DELETE':
-        endpoint_url = "http://35.228.239.24/api/v1/project"
-        headers = {"Content-Type" : "application/json"}
-
-        response = requests.delete(endpoint_url, headers=headers, data=json.dumps(params))
-        return response.text
 
 @app.route('/project/<model_id>')
 @is_logged_in
@@ -76,7 +60,6 @@ def display(model_id=None):
   return render_template('index.html', model_id=model_id)
 
 @app.route('/project/train', methods=['GET', 'POST'])
-# @is_logged_in
 def train():
   if request.method == 'GET':
     return render_template('train.html')
@@ -102,8 +85,6 @@ def train():
         default = False
         hyperTune = False
         custom = True
-    # default = bool(request.form['default'])
-    # hyperTune = bool(request.form['hypertune'])
 
     print("hello this is default status " + str(default))
     print("hello this is hyperTune status " + str(hyperTune))
@@ -113,7 +94,6 @@ def train():
     hardCodedTrainSplit = 0.8
     hardCodedValSplit = 0.2
 
-    # print(str(custom))
     if(default and not hyperTune):
         params = {
         "model-name": request.form['modelname'],
@@ -126,6 +106,8 @@ def train():
         "API-KEY": "MVK123"
         }
         print("the default and not Hypertune happened")
+        print(params)
+
     # HyperTune model
     if(not default and hyperTune):
         params = {
@@ -139,7 +121,7 @@ def train():
         "API-KEY": "MVK123"
         }
         print("the hyperTune and not default happened ")
-
+        print(params)
 
     # Custom models since not hypertune and not default:
     if (not default and not hyperTune):
@@ -161,22 +143,6 @@ def train():
             }
             # print(params)
             print("The If case: XGBoost happened")
-
-        # elif modeltype == "LinearRegression":
-        #     params = {
-        #     "model-name": request.form['modelname'],
-        #     "configurations":{
-        #     "model-type": request.form['modeltype'],
-        #     "default": request.form['default'],
-        #     "hyper-tune": request.form['hypertune'],
-        #     "learning-rate": float(request.form['learningrateLR']),
-        #     "train-split": int(request.form['trainsplitLR']),
-        #     "validation-split": int(request.form['valsplitLR']),
-        #     "max-depth": int(request.form['maxdepthLR'])},
-        #     "API-KEY": "MVK123"
-        #     }
-        #     # print(params)
-        #     print("The If case: Linear Regression happened")
 
         elif modeltype == "RandomForest":
             params = {
