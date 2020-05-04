@@ -50,10 +50,15 @@
         },
         options: {
           scales: {
+             display: true,
             yAxes: [{
+              scaleLabel :{
+                display : true,
+                labelString: "Predicted Work Load (MWh)"
+              },
               ticks: {
                 callback: function(value, index, values) {
-                  return "Placeholder text " + value + "";
+                  return value;
                   //beginAtZero : true;
                 }
                   // beginAtZero: true;
@@ -74,6 +79,7 @@
       const response = await fetch(url);
       const data = await response.json();
       const result = data.configurations;
+
 
       if ((data.configurations["model-type"]) == "XGBoost"){
       const thisXGBLearningRate =data.configurations["learning-rate"];
@@ -198,6 +204,18 @@
       }
     }
 
+    async function cannotDisplayModel(){
+      const response = await fetch(url);
+      const data = await response.json();
+      const result = data.configurations;
+      const status = data['status'];
+      console.log(status);
+      if(status != true){
+        location.href="http://35.228.171.219/project";
+      }
+    }
+
+    cannotDisplayModel();
     removeDiv();
     getConfigurations();
 
