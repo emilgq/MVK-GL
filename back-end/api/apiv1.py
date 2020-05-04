@@ -1,4 +1,4 @@
-import random, re, datetime, time
+import random, re, datetime, time, sys, os, errno
 from flask import Flask, json, abort, request, Response
 import psycopg2
 
@@ -10,6 +10,10 @@ from flask_cors import CORS
 
 # Import database conf and parser
 from config import config
+
+# Import home made Machine Learning module
+sys.path.append('../ml/')
+from ml import createModel, predictModel
 
 app = Flask(__name__)
 
@@ -69,20 +73,89 @@ def runDBQuery(query, parameters):
       conn.close()
     raise Exception(error)
 
-# Background task
-@celery.task
-def background_task(model_id, configurations):
-  for i in range(10):
-    time.sleep(1)
-    print(i)
-  print('finished')
-  # rmse = createModel(configurations, model_id)
-  rmse = 20
-  updatequery = "update ml_models set status = 'True', rmse = (%s) where model_id = (%s)"
-  updateParameters = (rmse, model_id,)
-  runDBQuery(updatequery, updateParameters)
-  print('updated')
-  return
+# Create model in background process
+def create_new_model(model_id, configurations):
+  try:  
+    print('Creating new model with conf: ' + str(configurations))
+    rmse = createModel(configurations, model_id)
+    updatequery = "update ml_models set status = 'True', rmse = (%s) where model_id = (%s)"
+    updateParameters = (rmse, model_id,)
+    runDBQuery(updatequery, updateParameters)
+  except Exception as error:
+    updatequery = "update ml_models set status = 'True' where model_id = (%s)"
+    runDBQuery(updatequery, (model_id,))
+    print('Model training failed with error message: {}'.format(error))
+  finally:
+    return True
+
+# Delete model as background process
+def delete_model(model_id):
+  # Wait for model to complete training before deletion
+  # Evaluate if model is ready to be deleted
+  query = "select status, rmse from ml_models where model_id = %s"
+
+  try:
+    (training_completed, rmse) = runDBQuery(query, (model_id,))[0][0]
+  except Exception as error:
+    raise Exception(error)
+
+  # Query yields no result
+  if training_completed is None: 
+    print('Model ID not found')
+    return 'Model ID not found'
+
+  # If status is true, model has finished training.
+  if (training_completed):
+    # Succeeded training assigns value to rmse
+    if rmse is not None:
+      print('Model {} ready for deletion'.format(model_id))
+      
+      # Delete model from ml/trained_models
+      if os.path.exists("../ml/trained_models/" + model_id):
+        os.remove("../ml/trained_models/" + model_id)
+        print('ML Object deleted')
+        query = "delete from ml_models where model_id = %s"
+        try: 
+          runDBQuery(query, (model_id,))  
+        except Exception as error:
+          raise Exception(error)
+        print('Model reference deleted from DB')
+        # End while loop
+        return 'ML Object deleted from file system and model reference deleted from DB'
+
+      # model not found in file system  
+      else:
+        print('ML Object not found') 
+        raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), os.path.abspath("../ml/trained_models/" + model_id)) 
+    
+    # rmse has no assigned value, implying error while training.
+    # Remove only db reference without cleaning file system
+    else:
+      print('Model had error while training and failed. Deleting DB reference.')
+      query = "delete from ml_models where model_id = %s"
+      try: 
+        runDBQuery(query, (model_id,))  
+      except Exception as error:
+        raise Exception(error)
+
+      print('Model reference deleted from DB')
+      return 'Model reference deleted from DB'
+
+  # If model has not finished training, do nothing. 
+  else:
+    print('Model is still training and cannot yet be deleted')
+    return 'Model is still training and cannot yet be deleted'
+
+
+  
+  # Add function which removes save model from filesystem if model is trained or abort training in case still training
+
+
+# Model load prediction
+def predict_model(model_id):
+  print('Predicting load for model with id: ' + model_id)
+  hours, load = predictModel(model_id)
+  return hours, load
 
 # API Resource for fetching model specific results
 @app.route('/api/v1/project/<model_id>', methods=['GET', 'DELETE'])
@@ -98,22 +171,22 @@ def modelresult(model_id):
     if len(result) == 0:
       abort(Response('Model not found', 404))
 
-    # Pass weather forecast through trained model (.score())
+    # Compile response object with headers and tuple content
     response = dict(zip(cols, result[0]))
     # Add result column
-    response['result'] = dict(zip(testTimes, testLoadPrediction))
+    response['hours'], response['load'] = predict_model(model_id)
     return json.dumps(response), 200
 
   # Remove model
   if request.method == 'DELETE':
+    print("received DEL req for model id: {}".format(model_id))
     args = request.get_json()
     try:
       if args['API-KEY'] != APIKEY:
         abort(Response('Unauthorized', 400))
-      query = "delete from ml_models where model_id = %s"
-      runDBQuery(query, (model_id,))
-      # Add function which removes save model from filesystem if model is trained or abort training in case still training
-      return Response(json.dumps({"message": "Succesfully deleted model with id: {}".format(model_id)}), 200)
+      # Run celery process of deleting model
+      delete_response = delete_model(model_id)
+      return Response(json.dumps({"message": delete_response, "model_id": model_id}), 200)
     except Exception as e:
       abort(Response('Error: {}'.format(e), 400))
 
@@ -136,42 +209,52 @@ def project():
     return json.dumps(response), 200
 
   if request.method == 'POST':
-  # Create new Machine Learning Model
     args = request.get_json()
     if args['API-KEY'] != APIKEY:
       abort(Response('unauthorized',400))
     configurations = args['configurations']
     if configurations['model-type'] not in ['XGBoost', 'RandomForest', 'SVR', 'LinearRegression']:
       abort(Response('Model type \"{}\" is not provided in this application. Select \"XGBoost\", \"RandomForest\", \"SVR\", or \"LinearRegression\"'.format(configurations['model-type']),400))
-    if (configurations['train-split']+configurations['validation-split'] != 100):
-      abort(Response('Split must total to 100',400))
+    
+    # Validate learning rate and max depth for XGBoost models
     if (configurations['model-type'] == 'XGBoost'):
         if (configurations['learning-rate'] < 0 || configurations['learning-rate'] > 1):
             abort(Response('Lerning rate must be a number from 0 to 1',400))
         if (configurations['max-depth'] <= 0):
             abort(Response('Max depth must be a positive number larger than 0',400))
+            
+    # Validate n-estimators and max depth for RandomForest models        
     if (configurations['model-type'] == 'RandomForest'):
         if (configurations['n-estimators'] <= 0):
             abort(Response('n-estimator must be a positive number larger than 0',400))
         if (configurations['max-depth'] <= 0):
             abort(Response('Max depth must be a positive number larger than 0',400))
+     
+    # Validate kernel and c for SVR models
     if (configurations['model-type'] == 'SVR'):
         if configurations['kernel'] not in ['linear', 'poly', 'rbf', 'sigmoid']:
              abort(Response('Kernel type \"{}\" is not provided in this application. Select \"linear\", \"poly\", \"rbf\", or \"sigmoid\"'.format(configurations['kernel']),400))
         if (configurations['c'] <= 0):
             abort(Response('C must be a positive number larger than 0',400)) #Vet inte om denna parameter heter C!!
-    # Run machine learning module
+            
+    if (configurations['train-split']+configurations['validation-split'] != 1):
+      abort(Response('Split must total to 1',400))
+    if configurations['hyper-tune'] not in ("True", "False") or configurations['default'] not in ("True", "False"):
+      abort(Response('Default and Hyper-tune must be True or False'))
+    if configurations['hyper-tune'] == "True" and configurations['default'] == "True":
+      abort(Response('Default and Hyper-tune cannot both be True'))
 
-    # Fetch reference from database
+    # Create reference in database
     query = "insert into ml_models (model_name, configurations, owner) values (%s,%s,%s)"
     parameters = (args['model-name'], json.dumps(configurations), 1337,)
-    # Embed in try/except
     try:
       runDBQuery(query, parameters)
+      # Get model_id of new model
       model_id, _ = runDBQuery("select model_id from ml_models order by time_creation desc limit 1", None)
-      background_task(model_id[0], configurations)
-      message = 'successful model creation'
-      return message, 200
+      # Start training as background process
+      create_new_model.delay(model_id[0][0], configurations)
+      message = {"msg": 'Model training started', "model-id": model_id}
+      return json.dumps(message), 200
     except Exception as e:
       abort(Response('Invalid argument. Error: {}'.format(e), 400))
 

@@ -1,0 +1,396 @@
+{% extends 'layout.html' %}
+{% block body %}
+<body>
+    <div id="login">
+        <h3 class="text-center text-white pt-5">Train Model</h3>
+        <div class="container">
+            <div id="login-row" class="row justify-content-center align-items-center">
+                <div id="login-column" class="col-md-6">
+                    <div id="login-box" class="col-md-12">
+                        <form id="login-form" class="form" action="" method="post">
+                            <h3 class="text-center text-info">Configure Model</h3><p class="text-info"> <i>In order to train a new model, please fill in the below form.</i></p>
+                            <div class="form-group" onchange = getModelName();>
+                                <label for="modelname"><b>Model Name: </b></label><br>
+                                <input type="text" name="modelname" id="modelname" class="form-control">
+                            </div>
+
+
+
+                            <div class="form-group"><b>Choose Model Setting:</b> <br>
+                                                          <select name = "modelsetting" id = "modelsetting">
+                                                            <option value = "Default" selected >Default</option>
+                                                            <option value = "Custom">Custom</option>
+                                                            <option value = "Hypertune">Hypertune</option>
+                                                        </select>
+                                                        <br></br>
+                            </div>
+
+                            <div class="form-group"><b>Model Type:</b> <br>
+                              <select name = "modeltype" id = "modeltype">
+                                <option value = "Default" selected>Choose one</option>
+                                <option value = "RandomForest">Random Forest</option>
+                                <!-- <option value = "Linear Regression">Linear Regression</option> -->
+                                <option value = "XGBoost">XGBoost</option>
+                                <option value = "SVR">SVR</option>
+                            </select>
+           <!-- XBG VALUES -->
+                            <div id = "XGB" class="form-group" style = "display:none;" onchange="getValuesXGB();">
+                                <label for="learningrate"><b> Learning Rate: </b></label><br>
+                                <input type="range" min="0" max="10" value="0" class="slider" id="myRange" name = "learningrateXG">
+                                <p><i>Value:</i> <span id="demo"></span></p>
+                                <!-- <div class="form-group">
+                                    <label for="learningrate" class="text-info">Learning Rate:</label><br>
+                                    <input type="range" min="0" max="10" value="5" class="slider" id="myRange">
+                                    <p>Value: <span id="demo"></span></p>
+                                </div> -->
+                                <label for="maxdepth" class="form-group"> <b> Max Depth: </b><br><i>Insert any number larger than 0</i></label><br>
+                                <input type="number" min="0"  value="0" class="slider" id="myRange2" name = "maxdepthXG">
+                                <p><i>Your selected max depth is: </i><span id="demo2"></span></p>
+                                <label for="trainsplit" class="form-group"><b>Train Split: </b></label><br>
+                                <input type="range" min="0" max="100" value="0" class="slider" id="myRange3" name ="trainsplitXG">
+                                <p>Value: <span id="demo3"></span></p>
+                                <label for="valsplit" class="form-group"><b>Validation Split: </b></label><br>
+                                <input type="hidden" min="0" max="100" value="0" class="slider" id="myRange4" name = "valsplitXG">
+                                <p> <span id="demo4"></span></p><hr>
+                                <p id ="test"><h3>Your selected values for this model are:</h3><br>
+                                <li>Model Name:<span id="XGBModelName"> </span></li>
+                                <li>Model Type: XGBoost</li>
+                                <li>Learning Rate: <span id="XBGLearningRateValue"></span></li>
+                                <li>Max Depth: <span id="XGBmaxDepth"></span></li>
+                                <li>Trainsplit: <span id ="XGBTrainSplit"> </span></li>
+                                <li>Valsplit: <span id = "XGBValidationSplit"> </span></li>
+                                <br>Press the "Train Model" button below to proceed with training.<hr>
+                                </p>
+                            </div>
+                            <!-- SVR VALS -->
+                            <div id = "SVR" class="form-group" style = "display:none;" onchange="getValuesSVR();">
+                              <br><p> <b>Select a Kernel</b> </p>
+                              <select name = "SVR KERNEL" id = "KERNEL">
+                                <option value = "linear" selected>linear</option>
+                                <option value = "poly">poly</option>
+                                <!-- <option value = "Linear Regression">Linear Regression</option> -->
+                                <option value = "rbf">rbf</option>
+                                <option value = "sigmoid">sigmoid</option>
+                              </select>
+                              <br><br>
+                                <label for="c"><b>Select a value for c:</b></label><br>
+                                <input type="number" min="0" value="5" class="slider" id="myRange11" name = "CSVR">
+                                <p><i>Value: </i><span id="demo11"></span></p>
+                                <!-- <div class="form-group">
+                                    <label for="learningrate" class="text-info">Learning Rate:</label><br>
+                                    <input type="range" min="0" max="10" value="5" class="slider" id="myRange">
+                                    <p>Value: <span id="demo"></span></p>
+                                </div> -->
+                                <!-- <label for="maxdepth" class="form-group">Max Depth: <br>Insert any number larger than 0</label><br>
+                                <input type="number" min="0"  value="0" class="slider" id="myRange2" name = "maxdepthXG">
+                                <p>Your selected max depth is: <span id="demo2"></span></p> -->
+                                <label for="trainsplit" class="form-group"><b>Train Split:</b></label><br>
+                                <input type="range" min="0" max="100" value="0" class="slider" id="myRange7" name ="trainsplitSVR">
+                                <p><i>Value: </i><span id="demo7"></span></p>
+                                <label for="valsplit" class="form-group"><b>Validation Split:</b></label><br>
+                                <input type="hidden" min="0" max="100" value="0" class="slider" id="myRange8" name = "valsplitSVR">
+                                <p><i>Value: </i><span id="demo8"></span></p>
+                                <hr><p><h3>Your selected values for this model are:</h3><br>
+                                <li>Model Name: <span id="SVRModelName"> </span></li>
+                                <li>Model Type: SVR</li>
+                                <li>Kernel: <span id ="SVRChoice"> </span></li>
+                                <li>C Value: <span id="SVRCvalue"></span> </li>
+                                <li>Trainsplit: <span id ="SVRTrainSplit"> </span></li>
+                                <li>Valsplit: <span id ="SVRValidationSplit"> </span></li>
+                                <br>Press the "Train Model" button below to proceed with training.<hr></p>
+                                <!-- <label for="trainsplit" class="form-group">Train Split:</label><br>
+                                <input type="range" min="0" max="100" value="0" class="slider" id="myRange3" name ="trainsplitXG">
+                                <p>Value: <span id="demo3"></span></p>
+                                <label for="valsplit" class="form-group">Validation Split:</label><br>
+                                <input type="hidden" min="0" max="100" value="0" class="slider" id="myRange4" name = "valsplitXG">
+                                <p> <span id="demo4"></span></p> -->
+
+                            </div>
+                            <!-- LR VALUES -->
+                            <!-- <div id = "LR" class ="form-group" style = "display:none;">
+                                <label for="learningrate">Learning Rate:</label><br>
+                                <input type="range" min="0" max="10" value="0" class="slider" id="myRange5" name = "learningrateLR">
+                                <p>Value: <span id="demo5"></span></p>
+                                <label for="maxdepth" class="form-group">Max Depth:</label><br>
+                                <input type="range" min="0" max="25" value="0" class="slider" id="myRange6" name = "maxdepthLR">
+                                <p>Value: <span id="demo6"></span></p>
+                                <label for="trainsplit" class="form-group">Train Split:</label><br>
+                                <input type="range" min="0" max="100" value="0" class="slider" id="myRange3" name = "trainsplitLR">
+                                <p>Value: <span id="demo3"></span></p>
+                                <label for="valsplit" class="form-group">Validation Split:</label><br>
+                                <input type="hidden" min="0" max="100" value="0" class="slider" id="myRange4" name = "valsplitLR">
+                                <p> <span id="demo4"></span></p>
+                            </div> -->
+                              <!-- RF VALUES -->
+                            <div id = "RF" class ="form-group" style = "display:none;" onchange="getValuesRF();"><br>
+                                <label for="n-estimators"><b>Select a value for the amount of n-estimators:</b></label><br>
+                                <input type="number" min="0" value="0" class="slider" id="myRange5" name = "n-estimatorRF">
+                                <p><i>Value: </i><span id="demo5"></span></p>
+                                <label for="maxdepth" class="form-group"><b>Max Depth:</b></label><br>
+                                <input type="range" min="0" max="25" value="0" class="slider" id="myRange6" name = "maxdepthRF">
+                                <p><i>Value: </i><span id="demo6"></span></p>
+                                <label for="trainsplit" class="form-group"><b>Train Split:</b></label><br>
+                                <input type="range" min="0" max="100" value="0" class="slider" id="myRange9" name = "trainsplitRF">
+                                <p><i>Value: </i><span id="demo9"></span></p>
+                                <label for="valsplit" class="form-group"><b>Validation Split:</b></label><br>
+                                <input type="hidden" min="0" max="100" value="0" class="slider" id="myRange10" name = "valsplitRF">
+                                <p><i>Value: </i><span id="demo10"></span></p>
+                                <hr><p><h3>Your selected values for this model are:</h3><br>
+                                <li>Model Name: <span id="RFModelName"> </span></li>
+                                <li>Model Type: Random Forest</li>
+                                <li>N-estimators: <span id="RFNestimators"> </span> </li>
+                                <li>Max Depth: <span id="RFMaxDepth"> </span></li>
+                                <li>Trainsplit: <span id ="RFTrainSplit"> </span></li>
+                                <li>Valsplit: <span id ="RFValidationSplit"> </span></li>
+                                <br>Press the "Train Model" button below to proceed with training.<hr>
+                                </p>
+                            </div>
+                            </div>
+                                <!-- <label for="modeltype" class="text-info">Model Type:</label><br>
+                                <select id ="MLAlgorithms">
+                                    <option value="XGBoost">XGBoost</option>
+                                    <option value="Random Forest">Random Forest</option>
+                                    <option value="Linear Regression">Linear Regression</option>
+                                 </select> -->
+                            <!-- <div class="form-group">
+                                <label for="learningrate" class="text-info">Learning Rate:</label><br>
+                                <input type="range" min="0" max="10" value="5" class="slider" id="myRange">
+                                <p>Value: <span id="demo"></span></p>
+                            </div> -->
+                            <!-- <div class="form-group">
+                                <label for="maxdepth" class="text-info">Max Depth:</label><br>
+                                <input type="range" min="0" max="10" value="5" class="slider" id="myRange2">
+                                <p>Value: <span id="demo2"></span></p>
+                            </div> -->
+                            <!-- <div class="form-group">
+                                <!-- <label for="trainsplit" class="text-info">Train Split:</label><br> -->
+                                <!-- <input type="hidden" min="0" max="100" value="" class="slider" id="myRange3">
+                                <p> <span id="demo3"></span></p>
+                            </div> -->
+                            <!-- <div class="form-group">
+                                 <label for="valsplit" class="text-info">Validation Split:</label><br>
+                                <input type="hidden" min="0" max="100" value="" class="slider" id="myRange4">
+                                <p> <span id="demo4"></span></p>
+                            </div> -->
+                            <div class="form-group">
+                                <input type="submit" name="submit" class="btn btn-info btn-md" value="Train model">
+                                <input type="button" class ="btn btn-info btn-md" value="Reset Model" href="/train" onclick="reloadPage();">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Display slider values -->
+    <script>
+        function reloadPage(){
+          location.reload();
+        }
+
+        var slider = document.getElementById("myRange"); // Slider for XGB Learningrate
+        var slider2 = document.getElementById("myRange2"); //Slider for XGB Maxdepth
+        var slider3 = document.getElementById("myRange3"); // XGB Trainsplit
+        var slider4 = document.getElementById("myRange4"); // XGB Valsplit
+        var slider5 = document.getElementById("myRange5"); //RF N estimators
+        var slider6 = document.getElementById("myRange6"); //RF Max depth
+        var slider7 = document.getElementById("myRange7"); //SVR Trainsplit
+        var slider8 = document.getElementById("myRange8"); //SVR Valsplit
+        var slider9 = document.getElementById("myRange9"); //RF Trainsplit
+        var slider10 = document.getElementById("myRange10"); //RF Valsplit
+        var slider11 = document.getElementById("myRange11"); // SVR C
+        var output = document.getElementById("demo"); // XGB learnrate
+        var output2 = document.getElementById("demo2"); //XGB maxdepth
+        var output3 = document.getElementById("demo3"); // XGB trainsplit
+        var output4 = document.getElementById("demo4"); //XGB Valsplit
+        var output5 = document.getElementById("demo5"); //RF N estimator
+        var output6 = document.getElementById("demo6"); // RF Max depth
+        var output7 = document.getElementById("demo7"); // SVR Trainsplit
+        var output8 = document.getElementById("demo8"); // SVR Valsplit
+        var output9 = document.getElementById("demo9"); // RF Trainsplit
+        var output10 = document.getElementById("demo10"); //RF Valsplit
+        var output11 = document.getElementById("demo11"); // SVR C
+
+        output.innerHTML = slider.value; // XGB learn rate
+        output2.innerHTML = slider2.value; //XGB maxdepth
+        output3.innerHTML = slider3.value; //XGB trainsplit
+        output4.innerHTML = slider4.value; // XGB Valsplit
+        output5.innerHTML = slider5.value; //RF N estimator
+        output6.innerHTML = slider6.value; //RF Max Depth
+        output7.innerHTML = slider7.value; //SVR Trainsplit
+        output9.innerHTML = slider9.value; //SVR Valsplit
+        output11.innerHTML = slider11.value; // SVR C
+        slider.oninput = function() { //XGB Learningrate
+          output.innerHTML = this.value/10;
+        }
+        slider2.oninput = function() { // XGB Maxdepth
+          output2.innerHTML = this.value;
+        }
+        slider3.oninput = function() { //XGB trainsplit & Valsplit
+          output3.innerHTML = this.value;
+          output4.innerHTML = (100 - this.value);
+        }
+        slider5.oninput = function() { //RF N estimator
+          output5.innerHTML = this.value;
+        }
+        slider6.oninput = function() { // RF Max depth
+          output6.innerHTML = this.value;
+        }
+        slider7.oninput = function() { // SVR Trainsplit and Valsplit
+          output7.innerHTML = this.value;
+          output8.innerHTML = (100 - this.value);
+        }
+        slider9.oninput = function() { //RF Trainsplit and Valsplit
+          output9.innerHTML = this.value;
+          output10.innerHTML = (100 - this.value);
+        }
+        slider11.oninput=function(){ //SVR C
+          output11.innerHTML=this.value;
+        }
+
+        /**
+        This func returns the user submitted values and makes sure the values that they choose are stored
+        as to ensure we can print them out back to the User to show what values they've chosen.
+        XGBoost arguments
+        */
+        function getValuesXGB() {
+          var XGBLR = document.getElementById("myRange");//get XGB Learningrate value
+          var XGBMD = document.getElementById("myRange2"); //XGB Max depth value
+          var XGTS = document.getElementById("myRange3"); //XGB Trainsplit value
+          XBGLearningRateValue = (XGBLR.value)/10;
+          XGBmaxDepth = (XGBMD.value);
+          XGBTrainSplit = (XGTS.value);
+          XGBValidationSplit =(100-(XGTS.value));
+          document.getElementById("XBGLearningRateValue").innerHTML = XBGLearningRateValue;
+          document.getElementById("XGBmaxDepth").innerHTML = XGBmaxDepth;
+          document.getElementById("XGBTrainSplit").innerHTML = XGBTrainSplit;
+          document.getElementById("XGBValidationSplit").innerHTML =XGBValidationSplit;
+        }
+
+        /**
+        This func returns the user submitted values and makes sure the values that they choose are stored
+        as to ensure we can print them out back to the User to show what values they've chosen.
+        SVR arguments
+        */
+        function getValuesSVR() {
+          var SVRC = document.getElementById("myRange11"); // Get SVR C value
+          var SVRTS = document.getElementById("myRange7"); // Get SVR Trainsplit Value
+          var SVR = document.getElementById("KERNEL");
+          SVRChoice = (SVR.value);
+          SVRCvalue = (SVRC.value);
+          SVRTrainSplit = (SVRTS.value);
+          console.log(SVRTrainSplit);
+          SVRValidationSplit = (100-(SVRTS.value));
+          document.getElementById("SVRChoice").innerHTML = SVRChoice;
+          document.getElementById("SVRCvalue").innerHTML = SVRCvalue;
+          document.getElementById("SVRTrainSplit").innerHTML = SVRTrainSplit;
+          document.getElementById("SVRValidationSplit").innerHTML = SVRValidationSplit;
+        }
+
+        /**
+        This func returns the user submitted values and makes sure the values that they choose are stored
+        as to ensure we can print them out back to the User to show what values they've chosen.
+        Random Forest arguments.
+        */
+        function getValuesRF(){
+          var RFN = document.getElementById("myRange5"); // Get RF n estimators
+          var RFMD = document.getElementById("myRange6"); // Get RF MaxDepth
+          var RFTS = document.getElementById("myRange9"); //Get RF Trainsplit
+          RFNestimators = (RFN.value);
+          RFMaxDepth = (RFMD.value);
+          RFTrainSplit = (RFTS.value);
+          RFValidationSplit = (100-(RFTS.value));
+          document.getElementById("RFNestimators").innerHTML = RFNestimators;
+          document.getElementById("RFMaxDepth").innerHTML = RFMaxDepth;
+          document.getElementById("RFTrainSplit").innerHTML = RFTrainSplit;
+          document.getElementById("RFValidationSplit").innerHTML = RFValidationSplit;
+        }
+
+        /**
+        Returns the model name that the user enters. Need 3 different ID's as to
+        enable printing them more than once. Also needed one per model type.
+        */
+        function getModelName(){
+          var MN = document.getElementById("modelname"); //Get the model name
+          XGBModelName = (MN.value);
+          RFModelName = (MN.value);
+          SVRModelName = (MN.value);
+          document.getElementById("XGBModelName").innerHTML = XGBModelName;
+          document.getElementById("RFModelName").innerHTML = RFModelName;
+          document.getElementById("SVRModelName").innerHTML = SVRModelName;
+        }
+
+        // function getBooleans(){
+        //   var default = document.getElementById("default");
+        //   var hyperTune = document.getElementById("hypertune");
+        //   var custom = document.getElementById("custom");
+        //
+        //   if ()
+        //
+        // }
+
+        $('#modelsetting').change(function(){
+        selection = $(this).val();
+        switch(selection)
+        {
+            case 'Default':
+                $('#XGB').hide();
+                $('#RF').hide();
+                $('#LR').hide();
+                $('#SVR').hide();
+                break;
+            case 'Custom':
+              $('#modeltype').change(function(){
+                selection = $(this).val();
+                switch(selection)
+                {
+                    case 'XGBoost':
+                        $('#XGB').show();
+                        $('#RF').hide();
+                        $('#LR').hide();
+                        $('#SVR').hide();
+                        break;
+                    case 'RandomForest':
+                        $('#RF').show();
+                        $('#XGB').hide();
+                        $('#LR').hide();
+                        $('#SVR').hide();
+                        break;
+                    case 'Default':
+                        $('#RF').hide();
+                        $('#XGB').hide();
+                        $('#LR').hide();
+                        $('#SVR').hide();
+                        break;
+                    case 'SVR':
+                        $('#RF').hide();
+                        $('#XGB').hide();
+                        $('#LR').hide();
+                        $('#SVR').show();
+                        break;
+                    default:
+                        $('#RF').hide();
+                        $('#XGB').hide();
+                        $('#LR').hide();
+                        $('#SVR').hide();
+                        break;
+                }
+              });
+                break;
+            case 'Hypertune':
+                $('#RF').hide();
+                $('#XGB').hide();
+                $('#LR').hide();
+                $('#SVR').hide();
+                break;
+            default:
+                $('#RF').hide();
+                $('#XGB').hide();
+                $('#LR').hide();
+                $('#SVR').hide();
+                break;
+        }
+      });
+        </script>
+</body>
+{% endblock %}
