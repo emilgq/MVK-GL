@@ -4,6 +4,7 @@ import psycopg2
 
 # Importing celery to be able to run tasks in the backround
 from celery import Celery
+from celery.exceptions import HardTimeLimitExceeded
 
 # To enable Cross Origin Requests (such as JS .fetch())
 from flask_cors import CORS
@@ -74,7 +75,7 @@ def runDBQuery(query, parameters):
     raise Exception(error)
 
 # Create model in background process
-@celery.task(time_limit=600)
+@celery.task(time_limit=5)
 def create_new_model(model_id, configurations):
   try:  
     print('Creating new model with conf: ' + str(configurations))
