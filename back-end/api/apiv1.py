@@ -74,6 +74,7 @@ def runDBQuery(query, parameters):
     raise Exception(error)
 
 # Create model in background process
+@celery.task
 def create_new_model(model_id, configurations):
   try:  
     print('Creating new model with conf: ' + str(configurations))
@@ -367,7 +368,7 @@ def benchmark():
   if request.method == 'GET':
     response = {}
     try: 
-      response['hours'], response['load'] = predict_model(0)
+      response['hours'], response['load'] = predict_model('0')
       response['model-name'] = 'Benchmark'
       response['model-type'] = 'LinearRegression'
       return json.dumps(response), 200
