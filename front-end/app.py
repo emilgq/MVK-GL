@@ -54,14 +54,21 @@ def logout():
       return redirect(url_for("login"))
 
 
-@app.route('/project', methods =['GET', 'POST'])
+@app.route('/project', methods =['GET', 'DELETE'])
 @is_logged_in
 def project():
+    # return render_template('project.html')
     if request.method == 'GET':
         return render_template('project.html')
   # if request.method == 'POST':
   #   endpoint_url = "http://35.228.239.24/api/v1/project/" #Should get the ID of the model to be deleted.
   #   headers = {"Content-Type" : "application/json"}
+    if request.method =='DELETE':
+        endpoint_url = "http://35.228.239.24/api/v1/project"
+        headers = {"Content-Type" : "application/json"}
+
+        response = requests.delete(endpoint_url, headers=headers, data=json.dumps(params))
+        return response.text
 
 @app.route('/project/<model_id>')
 @is_logged_in
@@ -210,7 +217,8 @@ def train():
     print(params)
     print("Hello this should get a response")
     response = requests.post(endpoint_url, headers=headers, data=json.dumps(params))
-    return response.text
+    flash("Your model is now in training, please be patient and refresh soon", "success")
+    return redirect(url_for("project"))
 
 
 if __name__ == "__main__":
