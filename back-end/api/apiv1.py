@@ -217,33 +217,38 @@ def project():
     if configurations['model-type'] not in ['XGBoost', 'RandomForest', 'SVR', 'LinearRegression']:
       abort(Response('Model type \"{}\" is not provided in this application. Select \"XGBoost\", \"RandomForest\", \"SVR\", or \"LinearRegression\"'.format(configurations['model-type']),400))
     
-    # Validate learning rate and max depth for XGBoost models
-    if (configurations['model-type'] == 'XGBoost'):
-        if (configurations['learning-rate'] < 0 or configurations['learning-rate'] > 1):
-            abort(Response('Lerning rate must be a number from 0 to 1',400))
-        if (configurations['max-depth'] <= 0):
-            abort(Response('Max depth must be a positive number larger than 0',400))
-            
-    # Validate n-estimators and max depth for RandomForest models        
-    if (configurations['model-type'] == 'RandomForest'):
-        if (configurations['n-estimators'] <= 0):
-            abort(Response('n-estimator must be a positive number larger than 0',400))
-        if (configurations['max-depth'] <= 0):
-            abort(Response('Max depth must be a positive number larger than 0',400))
-     
-    # Validate kernel and c for SVR models
-    if (configurations['model-type'] == 'SVR'):
-        if configurations['kernel'] not in ['linear', 'poly', 'rbf', 'sigmoid']:
-             abort(Response('Kernel type \"{}\" is not provided in this application. Select \"linear\", \"poly\", \"rbf\", or \"sigmoid\"'.format(configurations['kernel']),400))
-        if (configurations['c'] <= 0):
-            abort(Response('C must be a positive number larger than 0',400)) #Vet inte om denna parameter heter C!!
-            
-    if (configurations['train-split']+configurations['validation-split'] != 1):
-      abort(Response('Split must total to 1',400))
+    # Validate hyper-tune & default arguments
     if configurations['hyper-tune'] not in ("True", "False") or configurations['default'] not in ("True", "False"):
       abort(Response('Default and Hyper-tune must be True or False'))
     if configurations['hyper-tune'] == "True" and configurations['default'] == "True":
       abort(Response('Default and Hyper-tune cannot both be True'))
+
+    # If custom configuration, validate model-specific arguments
+    if configurations['hyper-tune'] == "False" and configurations['default'] == "False":
+      # Validate learning rate and max depth for XGBoost models
+      if (configurations['model-type'] == 'XGBoost'):
+          if (configurations['learning-rate'] < 0 or configurations['learning-rate'] > 1):
+              abort(Response('Lerning rate must be a number from 0 to 1',400))
+          if (configurations['max-depth'] <= 0):
+              abort(Response('Max depth must be a positive number larger than 0',400))
+              
+      # Validate n-estimators and max depth for RandomForest models        
+      if (configurations['model-type'] == 'RandomForest'):
+          if (configurations['n-estimators'] <= 0):
+              abort(Response('n-estimator must be a positive number larger than 0',400))
+          if (configurations['max-depth'] <= 0):
+              abort(Response('Max depth must be a positive number larger than 0',400))
+      
+      # Validate kernel and c for SVR models
+      if (configurations['model-type'] == 'SVR'):
+          if configurations['kernel'] not in ['linear', 'poly', 'rbf', 'sigmoid']:
+              abort(Response('Kernel type \"{}\" is not provided in this application. Select \"linear\", \"poly\", \"rbf\", or \"sigmoid\"'.format(configurations['kernel']),400))
+          if (configurations['c'] <= 0):
+              abort(Response('C must be a positive number larger than 0',400)) #Vet inte om denna parameter heter C!!
+            
+    if (configurations['train-split']+configurations['validation-split'] != 1):
+      abort(Response('Split must total to 1',400))
+    
 
     # Create reference in database
     query = "insert into ml_models (model_name, configurations, owner) values (%s,%s,%s)"
