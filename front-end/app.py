@@ -89,6 +89,7 @@ def train():
         }
         # print(params)
         print("The If case: XGBoost happened")
+
     elif modeltype == "LinearRegression":
         params = {
         "model-name": request.form['modelname'],
@@ -102,6 +103,7 @@ def train():
         }
         # print(params)
         print("The If case: Linear Regression happened")
+
     elif modeltype == "RandomForest":
         params = {
         "model-name": request.form['modelname'],
@@ -116,6 +118,7 @@ def train():
         # print("watafak")
         print(params)
         print("The If case: Random Forest happened")
+
     elif modeltype == "SVR":
         params = {
         "model-name": request.form['modelname'],
@@ -128,6 +131,7 @@ def train():
         "API-KEY": "MVK123"
         }
         print("The If case: SVR happened")
+
     else:
         print("The else case happened")
         flash("Error, something went wrong")
