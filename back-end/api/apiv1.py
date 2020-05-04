@@ -218,7 +218,7 @@ def project():
     
     # Validate learning rate and max depth for XGBoost models
     if (configurations['model-type'] == 'XGBoost'):
-        if (configurations['learning-rate'] < 0 || configurations['learning-rate'] > 1):
+        if (configurations['learning-rate'] < 0 or configurations['learning-rate'] > 1):
             abort(Response('Lerning rate must be a number from 0 to 1',400))
         if (configurations['max-depth'] <= 0):
             abort(Response('Max depth must be a positive number larger than 0',400))
