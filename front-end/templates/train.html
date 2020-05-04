@@ -15,14 +15,13 @@
                             </div>
 
 
-
                             <div class="form-group"><b>Choose Model Setting:</b> <br>
                                                           <select name = "modelsetting" id = "modelsetting">
                                                             <option value = "Default" selected >Default</option>
                                                             <option value = "Custom">Custom</option>
                                                             <option value = "Hypertune">Hypertune</option>
                                                         </select>
-                                                        <br></br>
+
                             </div>
 
                             <div class="form-group"><b>Model Type:</b> <br>
@@ -35,7 +34,7 @@
                             </select>
            <!-- XBG VALUES -->
                             <div id = "XGB" class="form-group" style = "display:none;" onchange="getValuesXGB();">
-                                <label for="learningrate"><b> Learning Rate: </b></label><br>
+                                <label for="learningrate"><b><br> Learning Rate: </b> <br><i>The length of a step. A lower number is more accurate than a larger number.</i> </label><br>
                                 <input type="range" min="0" max="10" value="0" class="slider" id="myRange" name = "learningrateXG">
                                 <p><i>Value:</i> <span id="demo"></span></p>
                                 <!-- <div class="form-group">
@@ -43,13 +42,13 @@
                                     <input type="range" min="0" max="10" value="5" class="slider" id="myRange">
                                     <p>Value: <span id="demo"></span></p>
                                 </div> -->
-                                <label for="maxdepth" class="form-group"> <b> Max Depth: </b><br><i>Insert any number larger than 0</i></label><br>
-                                <input type="number" min="0"  value="0" class="slider" id="myRange2" name = "maxdepthXG">
+                                <label for="maxdepth" class="form-group"> <b> Max Depth: </b><br><i>Max number of features used in each tree </i><br></label><br>
+                                <input type="number" min="1"  value="1" class="slider" id="myRange2" name = "maxdepthXG">
                                 <p><i>Your selected max depth is: </i><span id="demo2"></span></p>
-                                <label for="trainsplit" class="form-group"><b>Train Split: </b></label><br>
+                                <label for="trainsplit" class="form-group"><b>Train Split: </b> <br><i>Percentage of data used for training.</i></label><br>
                                 <input type="range" min="0" max="100" value="0" class="slider" id="myRange3" name ="trainsplitXG">
                                 <p>Value: <span id="demo3"></span></p>
-                                <label for="valsplit" class="form-group"><b>Validation Split: </b></label><br>
+                                <label for="valsplit" class="form-group"><b>Validation Split: </b><br><i>Percentage of data used for validation.</i></label><br>
                                 <input type="hidden" min="0" max="100" value="0" class="slider" id="myRange4" name = "valsplitXG">
                                 <p> <span id="demo4"></span></p><hr>
                                 <p id ="test"><h3>Your selected values for this model are:</h3><br>
@@ -73,7 +72,7 @@
                                 <option value = "sigmoid">sigmoid</option>
                               </select>
                               <br><br>
-                                <label for="c"><b>Select a value for c:</b></label><br>
+                                <label for="c"><b>Select a value for c:</b><i><br>Large C accepts smaller margins if the decision function is better at classifying all training points correctly. Smaller C allows larger margins. </i></label><br>
                                 <input type="number" min="0" value="5" class="slider" id="myRange11" name = "CSVR">
                                 <p><i>Value: </i><span id="demo11"></span></p>
                                 <!-- <div class="form-group">
@@ -84,10 +83,10 @@
                                 <!-- <label for="maxdepth" class="form-group">Max Depth: <br>Insert any number larger than 0</label><br>
                                 <input type="number" min="0"  value="0" class="slider" id="myRange2" name = "maxdepthXG">
                                 <p>Your selected max depth is: <span id="demo2"></span></p> -->
-                                <label for="trainsplit" class="form-group"><b>Train Split:</b></label><br>
+                                <label for="trainsplit" class="form-group"><b>Train Split:</b><br> <i>Percentage of data used for training. </i></label><br>
                                 <input type="range" min="0" max="100" value="0" class="slider" id="myRange7" name ="trainsplitSVR">
                                 <p><i>Value: </i><span id="demo7"></span></p>
-                                <label for="valsplit" class="form-group"><b>Validation Split:</b></label><br>
+                                <label for="valsplit" class="form-group"><b>Validation Split:</b><br> <i>Percentage of data used for validation. </i> </label><br>
                                 <input type="hidden" min="0" max="100" value="0" class="slider" id="myRange8" name = "valsplitSVR">
                                 <p><i>Value: </i><span id="demo8"></span></p>
                                 <hr><p><h3>Your selected values for this model are:</h3><br>
@@ -126,13 +125,13 @@
                                 <label for="n-estimators"><b>Select a value for the amount of n-estimators:</b></label><br>
                                 <input type="number" min="0" value="0" class="slider" id="myRange5" name = "n-estimatorRF">
                                 <p><i>Value: </i><span id="demo5"></span></p>
-                                <label for="maxdepth" class="form-group"><b>Max Depth:</b></label><br>
+                                <label for="maxdepth" class="form-group"><b>Max Depth:</b><br> <i>Depth of a tree, a deeper tree has more splits. </i></label><br>
                                 <input type="range" min="0" max="25" value="0" class="slider" id="myRange6" name = "maxdepthRF">
                                 <p><i>Value: </i><span id="demo6"></span></p>
-                                <label for="trainsplit" class="form-group"><b>Train Split:</b></label><br>
+                                <label for="trainsplit" class="form-group"><b>Train Split:</b> <br> <i>Percentage of data used for training. </i> </label><br>
                                 <input type="range" min="0" max="100" value="0" class="slider" id="myRange9" name = "trainsplitRF">
                                 <p><i>Value: </i><span id="demo9"></span></p>
-                                <label for="valsplit" class="form-group"><b>Validation Split:</b></label><br>
+                                <label for="valsplit" class="form-group"><b>Validation Split:</b> <br> <i>Percentage of data used for validation. </i></label><br>
                                 <input type="hidden" min="0" max="100" value="0" class="slider" id="myRange10" name = "valsplitRF">
                                 <p><i>Value: </i><span id="demo10"></span></p>
                                 <hr><p><h3>Your selected values for this model are:</h3><br>
