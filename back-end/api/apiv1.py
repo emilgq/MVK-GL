@@ -283,9 +283,7 @@ def weatherData():
   def benchmark():
     if request.method == 'GET'
 
-      hoursLoad = predict_model(0):
-
-      response['result'] = dict(zip(hoursLoad))
+      reponse['hours'], response['load'] = predict_model(0):
       response['model-name'] = 'Benchmark'
       response['model-type'] = 'LinearRegression'
 
