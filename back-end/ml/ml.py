@@ -168,8 +168,4 @@ def createModel(configurations, modelID):
     return model_rmse
 
 
-# Only for testing
-if __name__== '__main__':
-    #hyperTuneModel()
-    return
     
