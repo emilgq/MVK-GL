@@ -32,6 +32,8 @@
     async function chartNow() {
       const data = await getData();
       const ctx = document.getElementById('chart').getContext('2d');
+      console.log(data.rmse);
+
 
       const myChart = new Chart(ctx, {
         type: 'line',
@@ -40,13 +42,33 @@
           datasets: [{
             label: 'Prediction',
             data: data.ys,
-            fill: true,
+            fill: 'origin',
             backgroundColor: [
               'rgba(255, 99, 132, 0.2)'
             ],
             borderColor: 'rgba(255, 99, 132, 1)',
-            borderWidth: 1
-          }]
+            borderWidth: 1,
+            pointBackgroundColor: 'rgba(255, 99, 132, 1)'
+          },
+          {
+            label: 'RMSE-range',
+            data: data.posRmse,
+            fill: '0',
+            borderColor: 'rgb(192, 192, 42, 1)',
+            backgroundColor: 'rgb(249, 247, 132, 1)',
+            borderWidth: 1,
+            pointRadius: 0
+          },
+          {
+            label: 'RMSE-negrange',
+            data: data.negRmse,
+            fill: '0',
+            borderColor: 'rgb(192, 192, 42, 1)',
+            backgroundColor: 'rgb(249, 247, 132, 1)',
+            borderWidth: 1,
+            pointRadius: 0
+
+          }],
         },
         options: {
           scales: {
@@ -62,6 +84,13 @@
                 }
               }
             }]
+          },
+          legend: {
+            labels: {
+              filter: function(item, data){
+                return !item.text.includes('RMSE-negrange');
+              }
+            }
           }
         }
       });
@@ -91,7 +120,6 @@
         const thisRFTrainSplit = data.configurations["train-split"];
         const thisRFValidationSplit = data.configurations["validation-split"];
         console.log(thisRFNestimators + thisRFModel +  thisRFMaxDepth + thisRFTrainSplit + thisRFValidationSplit);
-
         document.getElementById("nEstimators").innerHTML =thisRFNestimators;
         document.getElementById("type2").innerHTML = thisRFModel;
         document.getElementById("thisRFMaxDepth").innerHTML = thisRFMaxDepth;
@@ -105,7 +133,6 @@
       const thisSVRTrainSplit = data.configurations["train-split"];
       const thisSVRValidationSplit = data.configurations["validation-split"];
       console.log("HEHEHHEH" + thisSVRC + thisSVRKernel + thisSVRModelType + thisSVRTrainSplit + thisSVRValidationSplit);
-
        document.getElementById("SVRC").innerHTML =thisSVRC;
        document.getElementById("type3").innerHTML = thisSVRModelType;
        document.getElementById("SVRKernel").innerHTML = thisSVRKernel;
@@ -116,23 +143,33 @@
     async function getData() {
       const xs = [];
       const ys = [];
+      var posRmse  = [];
+      var negRmse  = [];
       const response = await fetch(url);
       const data = await response.json();
-
+      const rmse =  data.rmse;
+      // console.log("this is the retrieved data" + data);
       const xAxisTest = data.hours;
       const yAxisTest = data.load;
       console.log("This is the  hours "+ xAxisTest);
       console.log("This is values else "+ yAxisTest);
-
       for (var i = 0; i < 24; i ++){
         xs.push(xAxisTest[i]);
       }
       for(var i = 0; i < 24; i++){
         ys.push(yAxisTest[i]);
       }
+      for(var i = 0; i < 24; i ++){
+        posRmse[i] = parseInt(yAxisTest[i], 10) + parseInt(data.rmse, 10);
+      }
+      for(var i = 0; i < 24; i ++){
+        negRmse[i] = parseInt(yAxisTest[i], 10) - parseInt(data.rmse, 10);
+      }
       return {
         xs,
-        ys
+        ys,
+        posRmse,
+        negRmse,
       };
     }
     getData();
@@ -141,7 +178,6 @@
       const response = await fetch(url);
       const data = await response.json();
       const result = data.configurations;
-
       const modelTypen = data.configurations["model-type"];
       console.log(modelTypen);
 
@@ -184,18 +220,6 @@
       }
     }
 
-    async function cannotDisplayModel(){
-      const response = await fetch(url);
-      const data = await response.json();
-      const result = data.configurations;
-      const status = data['status'];
-      console.log(status);
-      if(status != true){
-        location.href="http://35.228.171.219/project";
-      }
-    }
-
-    cannotDisplayModel();
     removeDiv();
     getConfigurations();
 

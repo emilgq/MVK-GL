@@ -1,5 +1,6 @@
 {% extends 'layout.html' %}
 {% block body %}
+
 <body>
     <div id="login">
         <h3 class="text-center text-white pt-5">Train Model</h3>
@@ -15,11 +16,12 @@
                             </div>
 
                             <div class="form-group"><b>Choose Model Setting:</b> <br>
-                                                          <select name = "modelsetting" id = "modelsetting">
-                                                            <option value = "Default" selected >Default</option>
-                                                            <option value = "Custom">Custom</option>
-                                                            <option value = "Hypertune">Hypertune</option>
-                                                        </select>
+
+                                <select name = "modelsetting" id = "modelsetting">
+                                  <option value = "Default" selected >Default</option>
+                                  <option value = "Custom">Custom</option>
+                                  <option value = "Hypertune">Hypertune</option>
+                              </select>
 
                             </div>
 
@@ -29,6 +31,7 @@
                                 <option value = "RandomForest">Random Forest</option>
                                 <option value = "XGBoost">XGBoost</option>
                                 <option value = "SVR">SVR</option>
+
                             </select>
                             <!-- XBG VALUES -->
                             <div id = "XGB" class="form-group" style = "display:none;" onchange="getValuesXGB();">
@@ -54,6 +57,9 @@
                                 <br>Press the "Train Model" button below to proceed with training.<hr>
                                 </p>
                             </div>
+
+               
+
                             <!-- SVR VALS -->
                             <div id = "SVR" class="form-group" style = "display:none;" onchange="getValuesSVR();">
                               <br><p> <b>Select a Kernel</b> </p>
@@ -257,9 +263,9 @@
           document.getElementById("RFModelName").innerHTML = RFModelName;
           document.getElementById("SVRModelName").innerHTML = SVRModelName;
         }
-
         $('#modelsetting').change(function(){
         selection = $(this).val();
+        
         switch(selection)
         {
             case 'Default':
@@ -320,6 +326,7 @@
                 break;
         }
       });
+
         </script>
 </body>
 {% endblock %}
