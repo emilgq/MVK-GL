@@ -75,7 +75,7 @@ def runDBQuery(query, parameters):
     raise Exception(error)
 
 # Create model in background process
-@celery.task(soft_time_limit=4, time_limit=5)
+@celery.task
 def create_new_model(model_id, configurations):
   try:  
     print('Creating new model with conf: ' + str(configurations))
