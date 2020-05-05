@@ -16,7 +16,7 @@ from urllib.request import urlopen
 # If we use randomsearch we will need to have more values.
 # Not all of the hyperparametrs are used, maybe add more later. 
 def hyperTuneModel(modelType, X_train, X_test, y_train, y_test):
-    kFold = KFold(n_splits=2, shuffle=True, random_state=13)
+    kFold = KFold(n_splits=3, shuffle=True, random_state=13)
 
     # Need to optimize to find the best intervall of parameters.
     if modelType == "RandomForest":
@@ -68,7 +68,7 @@ def hyperTuneModel(modelType, X_train, X_test, y_train, y_test):
         }
 
     # Randomized search for best hyperparameters
-    model_random = RandomizedSearchCV(estimator = model, param_distributions = random_grid, n_iter = 30, cv = kFold, verbose=2, random_state=42, n_jobs = -1)
+    model_random = RandomizedSearchCV(estimator = model, param_distributions = random_grid, n_iter = 10, cv = kFold, verbose=2, random_state=42, n_jobs = -1)
 
     model_random.fit(X_train, y_train)
     print("RMSE with radnomsearch: " + str(evaluate_model(X_test,y_test, model_random.best_estimator_)))
@@ -170,6 +170,6 @@ def createModel(configurations, modelID):
 
 # Only for testing
 if __name__== '__main__':
-    #hyperTuneModel(configurations)
+    #hyperTuneModel({})
     return
     
