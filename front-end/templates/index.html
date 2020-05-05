@@ -59,27 +59,17 @@
               ticks: {
                 callback: function(value, index, values) {
                   return value;
-                  //beginAtZero : true;
                 }
-                  // beginAtZero: true;
               }
             }]
           }
         }
       });
     }
-    // async function getConfigurationsRF(){
-    //   const response = await fetch(url);
-    //   const data = await response.json();
-    //   const result = data.configurations;
-    //
-    //   const thisRF
-    // }
     async function getConfigurations(){
       const response = await fetch(url);
       const data = await response.json();
       const result = data.configurations;
-
 
       if ((data.configurations["model-type"]) == "XGBoost"){
       const thisXGBLearningRate =data.configurations["learning-rate"];
@@ -128,22 +118,12 @@
       const ys = [];
       const response = await fetch(url);
       const data = await response.json();
-      // console.log("this is the retrieved data" + data);
+
       const xAxisTest = data.hours;
       const yAxisTest = data.load;
       console.log("This is the  hours "+ xAxisTest);
       console.log("This is values else "+ yAxisTest);
-      // console.log("this is the result" + result);
-      // const configurations = data.configurations;
-      // const result2 = Object.values(configurations);
-      // console.log("This is what yuore trying to find  "+ result2);
-      // const test = data.configurations;
-      // console.log(test + "hej");
-      // const xAxisTemp =
-      // const yAxis = Object.values(result);
-      // const xAxis = Object.keys(result);
-      // console.log("X-Axis values:" + xAxis + "here are values of time. 0-24.");
-      // console.log("Y-Axis values: " + yAxis + "here are values on the y-axis");
+
       for (var i = 0; i < 24; i ++){
         xs.push(xAxisTest[i]);
       }
@@ -161,7 +141,7 @@
       const response = await fetch(url);
       const data = await response.json();
       const result = data.configurations;
-      // console.log("hej "  + returned);
+
       const modelTypen = data.configurations["model-type"];
       console.log(modelTypen);
 
