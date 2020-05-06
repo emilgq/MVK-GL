@@ -1,0 +1,228 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+  <!--//chart.js loaded.-->
+</head>
+
+<body>
+  <h2 class="text-center text-info"> GreenLytics API prediction  </h2>
+
+  <a href="/project"><button style="border-radius:10px;" class="btn btn-info btn-md">
+      Go back to Resource management
+    </button></a>
+
+    <div id="XGB" class="text-center">Currently viewing model with ID <span id="modelName"> </span> which has the following Configurations: <br>Model Type: <span id="type"></span><br> Learning Rate: <span id="learnRateXGB"> </span> <br> Max-depth: <span id="maxDepthXGB"> </span><br> Train split: <span id="trainSplitXGB"> </span><br> Validation split: <span id="validationSplitXGB"> </span></div>
+    <div id="RF" class ="text-center"> Currently viewing model with ID <span id="modelName2"> </span> which has the following Configurations: <br>Model Type: <span id="type2"> </span><br> Max Depth: <span id="thisRFMaxDepth"> </span> <br> N-estimators: <span id="nEstimators"> </span><br> Train Split: <span id="thisRFTrainSplit"> </span> <br> Validation Split: <span id="thisRFValidationSplit"> </span></div>
+    <div id="SVR" class ="text-center"> Currently viewing model with ID <span id="modelName3"> </span> which has the following configurations: <br> Model Type: <span id="type3"> </span> <br> C value: <span id="SVRC"> </span><br> Kernel:  <span id="SVRKernel"> </span> <br> Train Split: <span id="SVRTrainSplit"> </span><br> Validation Split:  <span id="SVRValidationSplit"> </span></div>
+    <hr/>
+
+<canvas id="chart" width="800" height="200"> </canvas>
+
+  <script>
+    const model = '{{ model_id }}';
+    const url = 'http://35.228.239.24/api/v1/project/'.concat(model);
+    console.log(model + " this is the model id that you're currently plotting");
+    document.getElementById("modelName").innerHTML = model;
+    document.getElementById("modelName2").innerHTML = model;
+    document.getElementById("modelName3").innerHTML = model;
+
+    chartNow();
+    async function chartNow() {
+      const data = await getData();
+      const ctx = document.getElementById('chart').getContext('2d');
+      console.log(data.rmse);
+
+
+      const myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: data.xs,
+          datasets: [{
+            label: 'Prediction',
+            data: data.ys,
+            fill: 'origin',
+            backgroundColor: [
+              'rgba(255, 99, 132, 0.2)'
+            ],
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 1,
+            pointBackgroundColor: 'rgba(255, 99, 132, 1)'
+          },
+          {
+            label: 'RMSE-range',
+            data: data.posRmse,
+            fill: '0',
+            borderColor: 'rgb(192, 192, 42, 1)',
+            backgroundColor: 'rgb(249, 247, 132, 1)',
+            borderWidth: 1,
+            pointRadius: 0
+          },
+          {
+            label: 'RMSE-negrange',
+            data: data.negRmse,
+            fill: '0',
+            borderColor: 'rgb(192, 192, 42, 1)',
+            backgroundColor: 'rgb(249, 247, 132, 1)',
+            borderWidth: 1,
+            pointRadius: 0
+
+          }],
+        },
+        options: {
+          scales: {
+             display: true,
+            yAxes: [{
+              scaleLabel :{
+                display : true,
+                labelString: "Predicted Work Load (MWh)"
+              },
+              ticks: {
+                callback: function(value, index, values) {
+                  return value;
+                }
+              }
+            }]
+          },
+          legend: {
+            labels: {
+              filter: function(item, data){
+                return !item.text.includes('RMSE-negrange');
+              }
+            }
+          }
+        }
+      });
+    }
+    async function getConfigurations(){
+      const response = await fetch(url);
+      const data = await response.json();
+      const result = data.configurations;
+
+      if ((data.configurations["model-type"]) == "XGBoost"){
+      const thisXGBLearningRate =data.configurations["learning-rate"];
+      const thisXGBModel = data.configurations["model-type"];
+      const thisXGBMaxDepth =data.configurations["max-depth"];
+      const thisXGBTrainSplit =data.configurations["train-split"];
+      const thisXGBValidationSplit =data.configurations["validation-split"];
+
+      document.getElementById("type").innerHTML = thisXGBModel;
+      document.getElementById("learnRateXGB").innerHTML  = thisXGBLearningRate;
+      document.getElementById("maxDepthXGB").innerHTML = thisXGBMaxDepth;
+      document.getElementById("trainSplitXGB").innerHTML = thisXGBTrainSplit;
+      document.getElementById("validationSplitXGB").innerHTML = thisXGBValidationSplit;
+    }
+      if((data.configurations["model-type"]) == "RandomForest"){
+        const thisRFNestimators = data.configurations["n-estimators"];
+        const thisRFModel = data.configurations["model-type"];
+        const thisRFMaxDepth = data.configurations["max-depth"];
+        const thisRFTrainSplit = data.configurations["train-split"];
+        const thisRFValidationSplit = data.configurations["validation-split"];
+        console.log(thisRFNestimators + thisRFModel +  thisRFMaxDepth + thisRFTrainSplit + thisRFValidationSplit);
+        document.getElementById("nEstimators").innerHTML =thisRFNestimators;
+        document.getElementById("type2").innerHTML = thisRFModel;
+        document.getElementById("thisRFMaxDepth").innerHTML = thisRFMaxDepth;
+        document.getElementById("thisRFTrainSplit").innerHTML = thisRFTrainSplit;
+        document.getElementById("thisRFValidationSplit").innerHTML = thisRFValidationSplit;
+      }
+    if((data.configurations["model-type"]) == "SVR"){
+      const thisSVRC = data.configurations["c"];
+      const thisSVRKernel = data.configurations["kernel"];
+      const thisSVRModelType = data.configurations["model-type"];
+      const thisSVRTrainSplit = data.configurations["train-split"];
+      const thisSVRValidationSplit = data.configurations["validation-split"];
+      console.log("HEHEHHEH" + thisSVRC + thisSVRKernel + thisSVRModelType + thisSVRTrainSplit + thisSVRValidationSplit);
+       document.getElementById("SVRC").innerHTML =thisSVRC;
+       document.getElementById("type3").innerHTML = thisSVRModelType;
+       document.getElementById("SVRKernel").innerHTML = thisSVRKernel;
+       document.getElementById("SVRTrainSplit").innerHTML = thisSVRTrainSplit;
+       document.getElementById("SVRValidationSplit").innerHTML = thisSVRValidationSplit;
+      }
+    }
+    async function getData() {
+      const xs = [];
+      const ys = [];
+      var posRmse  = [];
+      var negRmse  = [];
+      const response = await fetch(url);
+      const data = await response.json();
+      const rmse =  data.rmse;
+      // console.log("this is the retrieved data" + data);
+      const xAxisTest = data.hours;
+      const yAxisTest = data.load;
+      console.log("This is the  hours "+ xAxisTest);
+      console.log("This is values else "+ yAxisTest);
+      for (var i = 0; i < 24; i ++){
+        xs.push(xAxisTest[i]);
+      }
+      for(var i = 0; i < 24; i++){
+        ys.push(yAxisTest[i]);
+      }
+      for(var i = 0; i < 24; i ++){
+        posRmse[i] = parseInt(yAxisTest[i], 10) + parseInt(data.rmse, 10);
+      }
+      for(var i = 0; i < 24; i ++){
+        negRmse[i] = parseInt(yAxisTest[i], 10) - parseInt(data.rmse, 10);
+      }
+      return {
+        xs,
+        ys,
+        posRmse,
+        negRmse,
+      };
+    }
+    getData();
+
+      async function removeDiv(){
+      const response = await fetch(url);
+      const data = await response.json();
+      const result = data.configurations;
+      const modelTypen = data.configurations["model-type"];
+      console.log(modelTypen);
+
+      if ((data.configurations["model-type"]) == "SVR"){
+        myFunctionXGB();
+        myFunctionRF();
+      }
+      if ((data.configurations["model-type"]) == "XGBoost"){
+        myFunctionSVR();
+        myFunctionRF();
+      }
+      if ((data.configurations["model-type"]) == "RandomForest"){
+        myFunctionXGB();
+        myFunctionSVR();
+      }
+    }
+
+    function myFunctionXGB() {
+      var x = document.getElementById("XGB");
+      if (x.style.display === "none") {
+        x.style.display = "block";
+        } else {
+        x.style.display = "none";
+      }
+    }
+    function myFunctionSVR() {
+      var x = document.getElementById("SVR");
+      if (x.style.display === "none") {
+        x.style.display = "block";
+        } else {
+        x.style.display = "none";
+      }
+    }
+    function myFunctionRF() {
+      var x = document.getElementById("RF");
+      if (x.style.display === "none") {
+        x.style.display = "block";
+        } else {
+        x.style.display = "none";
+      }
+    }
+
+    removeDiv();
+    getConfigurations();
+
+  </script>
+</body>
+{% endblock %}
