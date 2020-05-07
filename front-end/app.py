@@ -57,7 +57,7 @@ def project():
 @app.route('/project/<model_id>')
 @is_logged_in
 def display(model_id=None):
-  return render_template('index.html', model_id=model_id)
+  return render_template('display.html', model_id=model_id)
 
 @app.route('/project/train', methods=['GET', 'POST'])
 def train():

@@ -36,7 +36,7 @@
                             <!-- XBG VALUES -->
                             <div id = "XGB" class="form-group" style = "display:none;" onchange="getValuesXGB();">
                                 <label for="learningrate"><b><br> Learning Rate: </b> <br><i>The length of a step. A lower number is more accurate than a larger number.</i> </label><br>
-                                <input type="range" min="0" max="10" value="0" class="slider" id="myRange" name = "learningrateXG">
+                                <input type="range" min="0" max="2" value="0" class="slider" id="myRange" name = "learningrateXG">
                                 <p><i>Value:</i> <span id="demo"></span></p>
                                 <label for="maxdepth" class="form-group"> <b> Max Depth: </b><br><i>Max number of features used in each tree </i><br></label><br>
                                 <input type="number" min="1"  value="1" class="slider" id="myRange2" name = "maxdepthXG">
@@ -165,7 +165,7 @@
         output9.innerHTML = slider9.value; //SVR Valsplit
         output11.innerHTML = slider11.value; // SVR C
         slider.oninput = function() { //XGB Learningrate
-          output.innerHTML = this.value/10;
+          output.innerHTML = this.value/100;
         }
         slider2.oninput = function() { // XGB Maxdepth
           output2.innerHTML = this.value;
@@ -268,7 +268,42 @@
         
         switch(selection)
         {
-            case 'Default':
+            case 'Default':$('#modeltype').change(function(){
+              selection = $(this).val();
+              switch(selection)
+              {
+                  case 'XGBoost':
+                      $('#XGB').hide();
+                      $('#RF').hide();
+                      $('#LR').hide();
+                      $('#SVR').hide();
+                      break;
+                  case 'RandomForest':
+                      $('#RF').hide();
+                      $('#XGB').hide();
+                      $('#LR').hide();
+                      $('#SVR').hide();
+                      break;
+                  case 'Default':
+                      $('#RF').hide();
+                      $('#XGB').hide();
+                      $('#LR').hide();
+                      $('#SVR').hide();
+                      break;
+                  case 'SVR':
+                      $('#RF').hide();
+                      $('#XGB').hide();
+                      $('#LR').hide();
+                      $('#SVR').hide();
+                      break;
+                  default:
+                      $('#RF').hide();
+                      $('#XGB').hide();
+                      $('#LR').hide();
+                      $('#SVR').hide();
+                      break;
+              }
+            });
                 $('#XGB').hide();
                 $('#RF').hide();
                 $('#LR').hide();
@@ -313,6 +348,42 @@
               });
                 break;
             case 'Hypertune':
+            $('#modeltype').change(function(){
+              selection = $(this).val();
+              switch(selection)
+              {
+                  case 'XGBoost':
+                      $('#XGB').hide();
+                      $('#RF').hide();
+                      $('#LR').hide();
+                      $('#SVR').hide();
+                      break;
+                  case 'RandomForest':
+                      $('#RF').hide();
+                      $('#XGB').hide();
+                      $('#LR').hide();
+                      $('#SVR').hide();
+                      break;
+                  case 'Default':
+                      $('#RF').hide();
+                      $('#XGB').hide();
+                      $('#LR').hide();
+                      $('#SVR').hide();
+                      break;
+                  case 'SVR':
+                      $('#RF').hide();
+                      $('#XGB').hide();
+                      $('#LR').hide();
+                      $('#SVR').hide();
+                      break;
+                  default:
+                      $('#RF').hide();
+                      $('#XGB').hide();
+                      $('#LR').hide();
+                      $('#SVR').hide();
+                      break;
+              }
+            });
                 $('#RF').hide();
                 $('#XGB').hide();
                 $('#LR').hide();
