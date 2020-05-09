@@ -69,7 +69,8 @@
             borderColor: 'rgb(120, 120, 120, 120)',
             backgroundColor: 'rgb(120, 120, 120, 120)',
             borderWidth: 1,
-            pointRadius: 0
+            pointRadius: 0,
+            hidden: 'true'
           },
           {
             label: 'RMSE-negrange',
@@ -96,13 +97,13 @@
               }
             }]
           },
-          // legend: {
-          //   labels: {
-          //     filter: function(item, data){
-          //       return !item.text.includes('RMSE-negrange');
-          //     }
-          //   }
-          // }
+          legend: {
+            labels: {
+              filter: function(item, data){
+                return !item.text.includes('RMSE-negrange');
+              }
+            }
+          }
         }
       });
     }
