@@ -122,10 +122,12 @@
     </div>
     <!-- Display slider values -->
     <script>
+      // Reload page. This is used on the reset button
         function reloadPage(){
           location.reload();
         }
 
+        //various sliders used for values that are shown for the user.
         var slider = document.getElementById("myRange"); // Slider for XGB Learningrate
         var slider2 = document.getElementById("myRange2"); //Slider for XGB Maxdepth
         var slider3 = document.getElementById("myRange3"); // XGB Trainsplit
@@ -258,7 +260,7 @@
           document.getElementById("SVRModelName").innerHTML = SVRModelName;
         }
 
-        // This decides which div to choose on modelsetting change. 
+        // This decides which div to choose on modelsetting change.
         $('#modelsetting').change(function(){
         selection = $(this).val();
         switch(selection)
