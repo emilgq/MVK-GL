@@ -60,6 +60,7 @@ def display(model_id=None):
   return render_template('display.html', model_id=model_id)
 
 @app.route('/project/train', methods=['GET', 'POST'])
+@is_logged_in
 def train():
   if request.method == 'GET':
     return render_template('train.html')
