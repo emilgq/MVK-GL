@@ -68,7 +68,7 @@ def hyperTuneModel(modelType, X_train, X_test, y_train, y_test):
         }
 
     # Randomized search for best hyperparameters
-    model_random = RandomizedSearchCV(estimator = model, param_distributions = random_grid, n_iter = 150, cv = kFold, verbose=2, random_state=42, n_jobs = -1)
+    model_random = RandomizedSearchCV(estimator = model, param_distributions = random_grid, n_iter = 10, cv = kFold, verbose=2, random_state=42, n_jobs = -1)
 
     model_random.fit(X_train, y_train)
     print("RMSE with radnomsearch: " + str(evaluate_model(X_test,y_test, model_random.best_estimator_)))
@@ -168,8 +168,4 @@ def createModel(configurations, modelID):
     return model_rmse
 
 
-# Only for testing
-if __name__== '__main__':
-    #hyperTuneModel(configurations)
-    return
     

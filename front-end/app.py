@@ -68,6 +68,8 @@ def train():
     endpoint_url = "http://35.228.239.24/api/v1/project"
     headers = {"Content-Type" : "application/json"}
 
+
+
     default = False
     hyperTune = False
     custom = False
@@ -107,7 +109,7 @@ def train():
         }
         print("the default and not Hypertune happened")
         print(params)
-
+        
     # HyperTune model
     if(not default and hyperTune):
         params = {
@@ -120,6 +122,7 @@ def train():
         "validation-split": hardCodedValSplit},
         "API-KEY": "MVK123"
         }
+
         print("the hyperTune and not default happened ")
         print(params)
 
@@ -180,12 +183,12 @@ def train():
             print("The else case happened")
             flash("Error, something went wrong")
             return redirect(url_for("train"))
+          
     print(params)
     print("Hello this should get a response")
     response = requests.post(endpoint_url, headers=headers, data=json.dumps(params))
     flash("Your model is now in training, please be patient and refresh soon", "success")
     return redirect(url_for("project"))
-
-
+  
 if __name__ == "__main__":
     app.run(debug=True)
