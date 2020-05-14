@@ -138,7 +138,7 @@ def train():
             "model-type": request.form['modeltype'],
             "default": str(default),
             "hyper-tune": str(hyperTune),
-            "learning-rate": float(request.form['learningrateXG'])/10, # divided by 10 för den gör inte divisionen "i tid" i fetchstadie.
+            "learning-rate": float(request.form['learningrateXG'])/50, # divided by 10 för den gör inte divisionen "i tid" i fetchstadie.
             "max-depth": int(request.form['maxdepthXG']),
             "train-split": int(request.form['trainsplitXG'])/100,
             "validation-split": (100-int(request.form['trainsplitXG']))/100,},

@@ -1,3 +1,4 @@
+<!-- Code written by Per Arn and Isak Bengtsson for the KTH course DD1393 Mjukvarukonstruktion-->
 {% extends 'layout.html' %}
 
 {% block body %}
@@ -23,17 +24,21 @@
 <canvas id="chart" width="800" height="200"> </canvas>
 
   <script>
+    //model id
     const model = '{{ model_id }}';
+    //url used for fetching data
     const url = 'http://35.228.239.24/api/v1/project/'.concat(model);
+    //url used for fetching data
     const benchMarkURL = 'http://35.228.239.24/api/v1/benchmark';
-    var printedBench = false;
-    var firstTimeLoad = true;
+
     console.log(model + " this is the model id that you're currently plotting");
     document.getElementById("modelName").innerHTML = model;
     document.getElementById("modelName2").innerHTML = model;
     document.getElementById("modelName3").innerHTML = model;
 
     chartNow();
+    // This function creates a chart with datasets provided from other functions.
+    // Data such as the Prediction, rmse range, benchmark for the model.
     async function chartNow() {
       const data = await getData();
       const ctx = document.getElementById('chart').getContext('2d');
@@ -91,6 +96,7 @@
                 display : true,
                 labelString: "Predicted Work Load (MWh)"
               },
+              //print values on the y-axes
               ticks: {
                 callback: function(value, index, values) {
                   return value;
@@ -98,6 +104,7 @@
               }
             }]
           },
+          //Dont show the legend meaning it's not visible for the viewer.
           legend: {
             labels: {
               filter: function(item, data){
@@ -109,6 +116,8 @@
       });
     }
 
+    //This function gets the configurations from the model and saves it so
+    // the configurations can be printed out in the HTML doc.
     async function getConfigurations(){
       const response = await fetch(url);
       const data = await response.json();
@@ -169,6 +178,8 @@
         document.getElementById("type5").innerHTML = modelTypeHyper;
       }
     }
+    // This function fetches data from the api and stores the data in different arrays
+    // Which it then sends to the chart function, using the arrays.
     async function getData() {
       const xs = [];
       const ys = [];
@@ -213,6 +224,7 @@
     }
     getData();
 
+      //This function removes divs that are not supposed to be shown.
       async function removeDiv(){
       const response = await fetch(url);
       const data = await response.json();
@@ -264,7 +276,7 @@
         console.log("none of the above happened")
       }
     }
-
+    //Helperfunction for removediv. This one removes Hyper.
     function myFunctionHyper(){
       var x = document.getElementById("hyper");
       if (x.style.display === "none") {
@@ -273,6 +285,7 @@
         x.style.display = "none";
       }
     }
+    //Helperfunction for removediv. This one removes Default.
     function myFunctionDef(){
       var x = document.getElementById("def");
       if (x.style.display === "none") {
@@ -281,6 +294,7 @@
         x.style.display = "none";
       }
     }
+    //Helperfunction for removediv. This one removes XGB.
     function myFunctionXGB() {
       var x = document.getElementById("XGB");
       if (x.style.display === "none") {
@@ -289,6 +303,7 @@
         x.style.display = "none";
       }
     }
+    //Helperfunction for removediv. This one removes SVR.
     function myFunctionSVR() {
       var x = document.getElementById("SVR");
       if (x.style.display === "none") {
@@ -297,6 +312,7 @@
         x.style.display = "none";
       }
     }
+    //Helperfunction for removediv. This one removes RF.
     function myFunctionRF() {
       var x = document.getElementById("RF");
       if (x.style.display === "none") {
