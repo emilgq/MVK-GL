@@ -4,10 +4,10 @@
 
 ### Version 0 (27/2/2020)
 
-The initial version of the API provides placeholder data in the same format we intend on having in later versions with actual data. The data is hardcoded into python dictionaries and any update is lost upon server restart. 
+The initial version of the API provides placeholder data in the same format we intend on having in later versions with actual data. The data is hardcoded into python dictionaries and any update is lost upon server restart.
 
 ### Version 1 (18/5/2020)
-The second and current version of the API provides data stored in the Postgres Database and is integrated with the machine learning module. Please see the db/README.md for further database documentation. Any GET request fetches data from the database and any POST request alters it. Changes are permanent. 
+The second and current version of the API provides data stored in the Postgres Database and is integrated with the machine learning module. Please see the db/README.md for further database documentation. Any GET request fetches data from the database and any POST request alters it. Changes are permanent.
 
 #### /api/v1/project
 
@@ -19,7 +19,7 @@ GET - Returns references to all machine learning references models found in the 
 
 POST - Provided the POST request body contents described below, the server will add a new machine learning reference in ml_models and begin model training in accordance to the settings. Please see the machine learning module documentation for further description of creating new models.
 
-##### Argument details 
+##### Argument details
 For all POST requests, the following keys must be specified.
 | Body content key | Description                               | Allowed values               |
 | ---------------- | ----------------------------------------- | ---------------------------- |
@@ -44,27 +44,27 @@ The table below shows the keys required in the configurations object. All models
 | c       | SVR |  Margin size of decision function | Non-negative integer                         |
 
 
-##### Sample POST request. 
+##### Sample POST request.
 
 ```
 curl http://localhost:5000/api/v1/project -d '{"model-name": "XXXXX", "configurations": {"model-type": "XGBoost", "default": "False", "hyper-tune": "False", "learning-rate": 0.01, "max-depth":7, "train-split": 0.75, "validation-split": 0.25}, "API-KEY": "MVK123"}' -X POST -H "Content-Type: application/json"
 ```
 
 #### /api/v1/project/<model_id>
-This endpoint is the interface for specific resource details. The intention is to provide model configuration details and model results consisting of a energy consumption prediction in conjunction with a time series. 
+This endpoint is the interface for specific resource details. The intention is to provide model configuration details and model results consisting of a energy consumption prediction in conjunction with a time series.
 
 ##### Request types
 
-GET - Given a model_id, the return value is the corresponding energy consumption prediction made by the specified model, made on the current weather forecast. In addition, model configurations are also provided. Please read the machine learning module documentation for further description on making predictions. 
+GET - Given a model_id, the return value is the corresponding energy consumption prediction made by the specified model, made on the current weather forecast. In addition, model configurations are also provided. Please read the machine learning module documentation for further description on making predictions.
 
 DELETE - Deletes the specified model from the file system and in the database.
 
 #### /api/v1/weather-forecast
-This endpoint is the interface for weather forecasts. The intention is to provide an entry-point to the weather-forecast database and enable updates and retrievals. 
+This endpoint is the interface for weather forecasts. The intention is to provide an entry-point to the weather-forecast database and enable updates and retrievals.
 
 ##### Request types
 
-GET - Returns a forecast data including timestamp, wind speed, temperature and cloud coverage found in the weather_forecast relation. This data is updated hourly, for further description please read the data retrieval documentation. 
+GET - Returns a forecast data including timestamp, wind speed, temperature and cloud coverage found in the weather_forecast relation. This data is updated hourly, for further description please read the data retrieval documentation.
 
 POST - Provided the POST request arguments below, the server will update the given timestamp with given weather metrics and return the updated element as a response.
 
@@ -77,7 +77,7 @@ POST - Provided the POST request arguments below, the server will update the giv
 | cloud-cover | Rate of cloud coverage in percentage | Decimal value                        |
 | API-KEY     | Authorization parameter              | MVK123                               |
 
-##### Sample POST request. 
+##### Sample POST request.
 
 ```
 curl http://localhost:5000/api/v0/weather-forecast -d '{"timestamp":"2021-02-02 11:00", "wind": 0, "temperature": 0, "cloud-cover": 0, "API-KEY":"MVK123"}' -X POST -H "Content-Type: application/json"
@@ -85,11 +85,11 @@ curl http://localhost:5000/api/v0/weather-forecast -d '{"timestamp":"2021-02-02 
 
 
 #### /api/v1/weather-data
-This endpoint is the interface for the training data. The intention is to provide an entry-point to the weather-data database and enable updates and retrievals. 
+This endpoint is the interface for the training data. The intention is to provide an entry-point to the weather-data database and enable updates and retrievals.
 
 ##### Request types
 
-GET - Returns the full training data set including energy consumption, timestamp, wind speed, temperature and cloud coverage found in the weather_forecast relation. This data is updated daily, for further description please read the data retrieval documentation. 
+GET - Returns the full training data set including energy consumption, timestamp, wind speed, temperature and cloud coverage found in the weather_forecast relation. This data is updated daily, for further description please read the data retrieval documentation.
 
 POST - Provided the POST request arguments below, the server will add a new data point to the data set, provided the timestamp is valid and unique.
 
@@ -103,9 +103,27 @@ POST - Provided the POST request arguments below, the server will add a new data
 | consumption | MWh consumption rate | Decimal value      |
 | API-KEY     | Authorization parameter              | MVK123                               |
 
-##### Sample POST request. 
+##### Sample POST request.
 
 ```
 curl http://localhost:5000/api/v1/weather-data -d '{"timestamp":"2019-02-02 11:00", "temperature":280, "cloud-cover":99, "wind":14, "consumption":300, "API-KEY":"MVK123"}' -X POST -H "Content-Type: application/json"
 
 ```
+
+## Data retrieval
+All data is for Stockholm region
+
+### greenMegaFiller
+
+This script is used for initial filling of weather-data database. Retrieves timestamp, wind, Temperature, cloud-cover from greenlytics endpoint DWD_ICON-EU and consumption from Svenska kraftnäts to weather-data  endpoint.
+All data is sent to the weather-data endpoint.
+Dates have to manually be changed to correct ones. Can't use dates older than 2019-03-05 09:00 UTC or newer than today's date.
+Dates that need to be updates is start_date, end_date for GL and date_start and date-end for SVK.
+
+
+### green
+Sends data to weather-data endpoint with Loads, timestamp, wind, Temperature and cloud-cover. Script checks for latest date in database. Gets data from that date until yesterday.
+Script should run as cronjob once a day. Cronjob should be done after 12 pm otherwise error with date will occur.
+
+### forecast
+Sends forecast for wind temperature and cloud-cover for the comming 24 hours. The forecast from NCEP_GFS is update once a day. Get the forecsat for the comming 93 hours from NCEP_CPS. The script calculate the difference in hour from when the forcast was made. Should run as cronjob every hour to get the correct forecast. Sends the forecast to weather-forecast endpoint.
