@@ -12,7 +12,7 @@ from flask_cors import CORS
 # Import database conf and parser
 from config import config
 
-# Import home made Machine Learning module
+# Import machine learning module
 sys.path.append('../ml/')
 from ml import createModel, predictModel
 
@@ -45,8 +45,10 @@ testLoadPrediction = [-300000,-290000,-280000,-270000,-290000,-310000,-300000,-3
 testTimes = ['00:00','01:00','02:00','03:00','04:00','05:00','06:00','07:00','08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00', '20:00', '21:00', '22:00', '23:00']
 testLoadBenchmark = [-500,-100,-900,-270,-400,-310,-300,-310,-320,-330,-340,-310,-320,-290,-280,-300,-310,-330,-300,-280,-290,-280,-270,-320]
 
+# Helper function for run SQL queries against a database.
+# The function reads the connection parameters using the config() method and fetches data from a database.ini file.
 # Query must be a parametrized SQL Statement - (select * from ml_models where model_name = %s)
-# Paramteres must be a tuple with number of element equal to number of parameters in query. (XGB001)
+# Paramters must be a tuple with number of element equal to number of parameters in query. (XGB001)
 def runDBQuery(query, parameters):
   conn = None
   query_result = None
@@ -74,7 +76,8 @@ def runDBQuery(query, parameters):
       conn.close()
     raise Exception(error)
 
-# Create model in background process
+# Create model in background process 
+# Helper function which uses the method defined in the machine learning module at ml/ml.py
 @celery.task
 def create_new_model(model_id, configurations):
   try:  
@@ -92,10 +95,8 @@ def create_new_model(model_id, configurations):
 
 # Delete model as background process
 def delete_model(model_id):
-  # Wait for model to complete training before deletion
   # Evaluate if model is ready to be deleted
   query = "select status, rmse from ml_models where model_id = %s"
-
   try:
     (training_completed, rmse) = runDBQuery(query, (model_id,))[0][0]
   except Exception as error:
@@ -153,7 +154,7 @@ def delete_model(model_id):
   # Add function which removes save model from filesystem if model is trained or abort training in case still training
 
 
-# Model load prediction
+# Model load prediction using ml module function
 def predict_model(model_id):
   print('Predicting load for model with id: ' + model_id)
   hours, load = predictModel(model_id)
@@ -186,7 +187,6 @@ def modelresult(model_id):
     try:
       if args['API-KEY'] != APIKEY:
         abort(Response('Unauthorized', 400))
-      # Run celery process of deleting model
       delete_response = delete_model(model_id)
       return Response(json.dumps({"message": delete_response, "model_id": model_id}), 200)
     except Exception as e:

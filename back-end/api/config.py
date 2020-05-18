@@ -1,4 +1,12 @@
 # Script for extracting parameters for DB Connection
+# Below is the expected format of the database.ini file.
+
+# [postgresql]
+# host=localhost
+# database=mvk
+# user=emil
+# password=emil
+
 from configparser import ConfigParser 
  
 def config(filename='database.ini', section='postgresql'):
