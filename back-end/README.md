@@ -127,3 +127,18 @@ Script should run as cronjob once a day. Cronjob should be done after 12 pm othe
 
 ### forecast
 Sends forecast for wind temperature and cloud-cover for the comming 24 hours. The forecast from NCEP_GFS is update once a day. Get the forecsat for the comming 93 hours from NCEP_CPS. The script calculate the difference in hour from when the forcast was made. Should run as cronjob every hour to get the correct forecast. Sends the forecast to weather-forecast endpoint.
+
+
+## Machine learning module
+The different models are XGBoost, Random Forest and Support vector regression. The benchmark is Linear regression.
+
+The main methods are __createModel, predictModel and hyperTuneModel__
+
+### createModel
+`createModel(configurations, modelID)` train and evaluate a model with the stated configurations and saves the model locally using pickle with the modelID as the name. It returns the RMSE of the trained model.
+
+### predictModel
+`predictModel(modelID)` takes a model name as the argument, then it loads the model with the specific modelID and use the model to predict the weather-load on the upcomming 24 hours. It returns all the predicted values with its corresponding timestamps.
+
+### hyperTuneModel
+hyperTuneModel are used when the hypertune is set to true in configurations. This method is used to find a really good model by testing multiple sets of hyperparameters in order to find the best ones. This is done using randomGridSearchVC, which basically is a way to test random hyperparameters from a specific set in order to find the best configuration. It returns the best model of the ones tested.
