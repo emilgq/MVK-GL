@@ -22,11 +22,11 @@ yesterday_Str = yesterday_Date.strftime("%Y-%m-%d")
 start_str = yesterday_Str + '  18'
 # Makes Array with year , month , day
 date_list = (yesterday_Str.split('-'))
-#creates a datetime object that corresponds to the last retrieval,
+# creates a datetime object that corresponds to the last retrieval,
 # used to calculate the difference in hours between current hour and last retrieval
 retrive_date_hour = datetime(int(date_list[0]),int(date_list[1]),int(date_list[2]),18)
 
-# difference in seconds since last retrieval
+# difference in seconds since last retrieval from GL
 diff_dates = today_date-retrive_date_hour
 # calculate the difference in hours to know what index to start from, rounded down
 # Divide by 3600 seconds to get hours
@@ -53,10 +53,10 @@ df_forecast = pd.read_json(response.text)
 df_forecast['date_valid_datetime'] = [(dateutil.parser.parse(row)).replace(tzinfo=None) for row in df_forecast['valid_datetime']]
 
 
-#Last forecast was retrived before the current days forecast
+# Last forecast was retrived before the current days forecast
 # Send data to forecast endpoint
 # Casts cloudcover from num int64 to int so it's serializable in JSON
-# 30 and 54 is the corrcet hours for todays index.
+# Sends data from the current hour and the comming 24 hours.
 for i in range(diff_hours,(diff_hours+24)):
     # String of the timestamp with correct formation for the API
     date_Str = df_forecast['date_valid_datetime'][i].strftime("%Y-%m-%d %H:%M")
